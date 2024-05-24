@@ -27,12 +27,12 @@ public class ContinuousTrapezoidalMembership
 
     @Override
     public float grade(Float x) {
-        if (x >= a && x <= b) {
+        if (x >= a && x < b) {
             return (x - a) / (b - a);
-        } else if (x >= b && x <= c) {
+        } else if (x >= b && x < c) {
             return 1;
-        } else if (x >= c && x <= d) {
-            return (d - x) / (b - a);
+        } else if (x >= c && x < d) {
+            return (d - x) / (d - c);
         } else {
             return 0;
         }
