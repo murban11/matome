@@ -1,5 +1,7 @@
-package com.example;
+package com.example.FeatureExtractors;
 
+import com.example.FeatureExtractor;
+import com.example.Subject;
 import com.example.FuzzyLogic.ContinuousInterval;
 
 public class DiastolicFeatureExtractor implements FeatureExtractor<Subject> {
