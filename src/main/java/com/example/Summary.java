@@ -3,27 +3,34 @@ package com.example;
 import java.util.ArrayList;
 import java.util.List;
 
-// TODO: Get rid of T
-public class Summary<T, S> {
+public class Summary<S> {
     public static final int QUALITIES_COUNT = 10;
 
-    private Quantifier<T> quantifier;
-    private List<QualifierSummarizer<S>> qualifiers;
+    private RelativeQuantifier relativeQuantifier = null;
+    private AbsoluteQuantifier absoluteQuantifier = null;
+    private List<QualifierSummarizer<S>> qualifiers = null;
     private List<QualifierSummarizer<S>> summarizers;
     private float[] qualities = new float[QUALITIES_COUNT];
     private boolean qualitiesCalculated = false;
 
     public Summary(
-        Quantifier<T> quantifier,
+        RelativeQuantifier quantifier,
         List<QualifierSummarizer<S>> summarizers
     ) {
-        this.quantifier = quantifier;
-        this.qualifiers = null;
+        this.relativeQuantifier = quantifier;
         this.summarizers = new ArrayList<>(summarizers);
     }
 
     public Summary(
-        Quantifier<T> quantifier,
+        AbsoluteQuantifier quantifier,
+        List<QualifierSummarizer<S>> summarizers
+    ) {
+        this.absoluteQuantifier = quantifier;
+        this.summarizers = new ArrayList<>(summarizers);
+    }
+
+    public Summary(
+        RelativeQuantifier quantifier,
         List<QualifierSummarizer<S>> qualifiers,
         List<QualifierSummarizer<S>> summarizers
     ) {
@@ -79,14 +86,14 @@ public class Summary<T, S> {
                     += summarizer_qualifier_grade;
 
                 if (qualifiers != null) {
-                    qualities[0] = ((RelativeQuantifier)quantifier)
+                    qualities[0] = relativeQuantifier
                         .grade(summarizer_and_qualifier_sigma_count
                             / qualifier_sigma_count);
-                } else if (quantifier instanceof RelativeQuantifier) {
-                    qualities[0] = ((RelativeQuantifier)quantifier)
+                } else if (relativeQuantifier != null) {
+                    qualities[0] = relativeQuantifier
                         .grade(summarizer_sigma_count / (float)subjects.size());
-                } else if (quantifier instanceof AbsoluteQuantifier) {
-                    qualities[0] = ((AbsoluteQuantifier)quantifier)
+                } else if (absoluteQuantifier != null) {
+                    qualities[0] = absoluteQuantifier
                         .grade(Math.round(summarizer_sigma_count));
                 } else {
                     assert(false);
@@ -101,7 +108,9 @@ public class Summary<T, S> {
 
     public String toString(String subjectsName) {
         StringBuilder sb = new StringBuilder(
-            quantifier.getLabel() + " " + subjectsName
+            (relativeQuantifier != null)
+                ? relativeQuantifier.getLabel() : absoluteQuantifier.getLabel() 
+            + " " + subjectsName
         );
         if (qualifiers != null) {
             sb.append(" being/having ");

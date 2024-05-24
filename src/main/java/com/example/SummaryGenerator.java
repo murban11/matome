@@ -3,19 +3,26 @@ package com.example;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SummaryGenerator<T, S> {
-    private List<Quantifier<T>> quantifiers;
+public class SummaryGenerator<S> {
+    private List<RelativeQuantifier> relativeQuantifiers = null;
+    private List<AbsoluteQuantifier> absoluteQuantifiers = null;
     private List<QualifierSummarizer<S>> qualifierSummarizers;
     private float[] qualityWeights;
     private List<S> subjects;
 
     public SummaryGenerator(
-        List<Quantifier<T>> quantifiers,
+        List<RelativeQuantifier> relativeQuantifiers,
+        List<AbsoluteQuantifier> absoluteQuantifiers,
         List<QualifierSummarizer<S>> qualifierSummarizers,
         float[] qualityWeights,
         List<S> subjects
     ) throws Exception {
-        this.quantifiers = new ArrayList<>(quantifiers);
+        if (relativeQuantifiers != null) {
+            this.relativeQuantifiers = new ArrayList<>(relativeQuantifiers);
+        }
+        if (absoluteQuantifiers != null) {
+            this.absoluteQuantifiers = new ArrayList<>(absoluteQuantifiers);
+        }
         this.qualifierSummarizers = new ArrayList<>(qualifierSummarizers);
 
         if (qualityWeights.length != Summary.QUALITIES_COUNT) {
@@ -25,30 +32,11 @@ public class SummaryGenerator<T, S> {
         this.subjects = new ArrayList<>(subjects);
     }
 
-    List<Summary<T, S>> generate() {
-        List<Summary<T, S>> summaries = new ArrayList<>();
+    public List<Summary<S>> generate() {
+        List<Summary<S>> summaries = new ArrayList<>();
 
-        for (var quantifier : quantifiers) {
-            QualifierSummarizerSubsetGenerator<S> qsGen
-                = new QualifierSummarizerSubsetGenerator<>(qualifierSummarizers);
-            while (qsGen.hasNext()) {
-                List<QualifierSummarizer<S>> qs = qsGen.nextSubset();
-                if (quantifier instanceof RelativeQuantifier) {
-                    summaries.add(new Summary<T, S>(quantifier, qs));
-                }
-
-                QualifierSummarizerSubsetGenerator<S> sGen
-                    = new QualifierSummarizerSubsetGenerator<>(qs);
-                while (sGen.hasNext()) {
-                    Pair<List<QualifierSummarizer<S>>, List<QualifierSummarizer<S>>> qsPair = sGen.nextSubsetAndRemainder();
-                    List<QualifierSummarizer<S>> summarizers = qsPair.first;
-                    var qualifiers = qsPair.second;
-
-                    if (qualifiers.size() > 0) {
-                        summaries.add(new Summary<T, S>(quantifier, qualifiers, summarizers));
-                    }
-                }
-            }
+        for (var quantifier : relativeQuantifiers) {
+            generate(summaries, quantifier);
         }
 
         // TODO: Sort summaries based on their quality
@@ -56,5 +44,45 @@ public class SummaryGenerator<T, S> {
         // on the same feature
 
         return summaries;
+    }
+
+    private void generate(
+        List<Summary<S>> summaries,
+        Quantifier<?> quantifier
+    ) {
+        QualifierSummarizerSubsetGenerator<S> qsGen
+            = new QualifierSummarizerSubsetGenerator<>(qualifierSummarizers);
+        while (qsGen.hasNext()) {
+            List<QualifierSummarizer<S>> qs = qsGen.nextSubset();
+            if (quantifier instanceof RelativeQuantifier) {
+                summaries.add(
+                    new Summary<S>((RelativeQuantifier)quantifier, qs)
+                );
+            } else if (quantifier instanceof AbsoluteQuantifier) {
+                summaries.add(
+                    new Summary<S>((AbsoluteQuantifier)quantifier, qs)
+                );
+            } else {
+                assert(false);
+            }
+
+            QualifierSummarizerSubsetGenerator<S> sGen
+                = new QualifierSummarizerSubsetGenerator<>(qs);
+            while (sGen.hasNext()) {
+                var qsPair = sGen.nextSubsetAndRemainder();
+                List<QualifierSummarizer<S>> summarizers = qsPair.first;
+                var qualifiers = qsPair.second;
+
+                if (qualifiers.size() > 0) {
+                    summaries.add(
+                        new Summary<S>(
+                            (RelativeQuantifier)quantifier,
+                            qualifiers,
+                            summarizers
+                        )
+                    );
+                }
+            }
+        }
     }
 }
