@@ -28,6 +28,10 @@ public class QualifierSummarizer<S> implements LabeledFuzzySet<Float> {
         return grade(featureExtractor.extract(subject));
     }
 
+    public String getFeatureName() {
+        return featureExtractor.getFeatureName();
+    }
+
     @Override
     public float grade(Float x) {
         return fuzzySet.grade(x);

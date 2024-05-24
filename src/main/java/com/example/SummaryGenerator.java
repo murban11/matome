@@ -35,13 +35,18 @@ public class SummaryGenerator<S> {
     public List<Summary<S>> generate() {
         List<Summary<S>> summaries = new ArrayList<>();
 
-        for (var quantifier : relativeQuantifiers) {
-            generate(summaries, quantifier);
+        if (relativeQuantifiers != null) {
+            for (var quantifier : relativeQuantifiers) {
+                generate(summaries, quantifier);
+            }
+        }
+        if (absoluteQuantifiers != null) {
+            for (var quantifier : absoluteQuantifiers) {
+                generate(summaries, quantifier);
+            }
         }
 
         // TODO: Sort summaries based on their quality
-        // TODO: Exclude summaries that have qualifiers and summarizers based
-        // on the same feature
 
         return summaries;
     }
@@ -50,28 +55,28 @@ public class SummaryGenerator<S> {
         List<Summary<S>> summaries,
         Quantifier<?> quantifier
     ) {
-        QualifierSummarizerSubsetGenerator<S> qsGen
+        QualifierSummarizerSubsetGenerator<S> generator
             = new QualifierSummarizerSubsetGenerator<>(qualifierSummarizers);
-        while (qsGen.hasNext()) {
-            List<QualifierSummarizer<S>> qs = qsGen.nextSubset();
+
+        while (generator.hasNextSummarizers()) {
+            List<QualifierSummarizer<S>> summarizers
+                = generator.nextSummarizers();
+
             if (quantifier instanceof RelativeQuantifier) {
                 summaries.add(
-                    new Summary<S>((RelativeQuantifier)quantifier, qs)
+                    new Summary<S>((RelativeQuantifier)quantifier, summarizers)
                 );
             } else if (quantifier instanceof AbsoluteQuantifier) {
                 summaries.add(
-                    new Summary<S>((AbsoluteQuantifier)quantifier, qs)
+                    new Summary<S>((AbsoluteQuantifier)quantifier, summarizers)
                 );
             } else {
                 assert(false);
             }
 
-            QualifierSummarizerSubsetGenerator<S> sGen
-                = new QualifierSummarizerSubsetGenerator<>(qs);
-            while (sGen.hasNext()) {
-                var qsPair = sGen.nextSubsetAndRemainder();
-                List<QualifierSummarizer<S>> summarizers = qsPair.first;
-                var qualifiers = qsPair.second;
+            while (generator.hasNextQualifiers()) {
+                List<QualifierSummarizer<S>> qualifiers
+                    = generator.nextQualifiers();
 
                 if (qualifiers.size() > 0) {
                     summaries.add(

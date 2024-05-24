@@ -4,47 +4,160 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class QualifierSummarizerSubsetGenerator<S> {
-    private int subsetCount;
-    private int currSubset = 0;
-    private List<QualifierSummarizer<S>> qs;
+
+    /*
+     * This list contains qualifiers/summarizers splitted in classes based
+     * on the feature they are referring to.
+     */
+    private List<List<QualifierSummarizer<S>>> classes;
+
+    /*
+     * Contains indexes of summarizers selected in each of the classes.
+     * If some element of this list has the value of -1, that means no
+     * summarizer is selected in that class.
+     */
+    private List<Integer> selectedSummarizers;
+
+    /*
+     * Contains indexes of qualifiers selected in each of the classes,
+     * similar to the `selectedSummarizers` field. A qualifier should not be
+     * selected from a class from which a summarizer is already selected.
+     */
+    private List<Integer> selectedQualifiers;
 
     public QualifierSummarizerSubsetGenerator(
-        List<QualifierSummarizer<S>> qs
+        List<QualifierSummarizer<S>> qualifiersSummarizers
     ) {
-        this.qs = qs;
-        this.subsetCount = (1 << qs.size()) - 1;
-    }
-
-    public boolean hasNext() {
-        return currSubset < subsetCount;
-    }
-
-    public List<QualifierSummarizer<S>> nextSubset() {
-        currSubset += 1;
-        List<QualifierSummarizer<S>> subset = new ArrayList<>();
-
-        for (int i = 0; i < qs.size(); ++i) {
-            if ((currSubset & (1 << i)) > 0) {
-                subset.addLast(qs.get(i));
+        this.classes = new ArrayList<>();
+        for (QualifierSummarizer<S> qs : qualifiersSummarizers) {
+            boolean classFound = false;
+            for (var c : classes) {
+                if (qs.getFeatureName().equals(c.get(0).getFeatureName())) {
+                    c.add(qs);
+                    classFound = true;
+                    break;
+                }
+            }
+            if (!classFound) {
+                List<QualifierSummarizer<S>> newClass = new ArrayList<>();
+                newClass.add(qs);
+                classes.add(newClass);
             }
         }
 
-        return subset;
+        this.selectedSummarizers = new ArrayList<>(classes.size());
+        this.selectedQualifiers = new ArrayList<>(classes.size());
+        for (int i = 0; i < classes.size(); ++i) {
+            this.selectedSummarizers.add(-1);
+            this.selectedQualifiers.add(-1);
+        }
     }
 
-    public Pair<List<QualifierSummarizer<S>>, List<QualifierSummarizer<S>>> nextSubsetAndRemainder() {
-        currSubset += 1;
-        List<QualifierSummarizer<S>> subset = new ArrayList<>();
-        List<QualifierSummarizer<S>> remainder = new ArrayList<>();
-
-        for (int i = 0; i < qs.size(); ++i) {
-            if ((currSubset & (1 << i)) > 0) {
-                subset.addLast(qs.get(i));
-            } else {
-                remainder.addLast(qs.get(i));
+    public boolean hasNextSummarizers() {
+        for (int i = 0; i < classes.size(); ++i) {
+            if (selectedSummarizers.get(i) < classes.get(i).size() - 1) {
+                return true;
             }
         }
+        return false;
+    }
 
-        return new Pair<>(subset, remainder);
+    public boolean hasNextQualifiers() {
+        for (int i = 0; i < classes.size(); ++i) {
+            if (
+                selectedSummarizers.get(i) == -1
+                    && selectedQualifiers.get(i) < classes.get(i).size() - 1
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public List<QualifierSummarizer<S>> nextSummarizers() {
+        updateSelectedSummarizers();
+
+        List<QualifierSummarizer<S>> summarizers
+            = new ArrayList<>(classes.size());
+
+        for (int i = 0; i < classes.size(); ++i) {
+            int selectedIndex = selectedSummarizers.get(i);
+            if (selectedIndex == -1) {
+                continue;
+            }
+            summarizers.add(classes.get(i).get(selectedIndex));
+        }
+
+        return summarizers;
+    }
+
+    public List<QualifierSummarizer<S>> nextQualifiers() {
+        updateSelectedQualifiers();
+
+        List<QualifierSummarizer<S>> qualifiers
+            = new ArrayList<>(classes.size());
+
+        for (int i = 0; i < classes.size(); ++i) {
+            int selectedIndex = selectedQualifiers.get(i);
+            if (selectedIndex == -1) {
+                continue;
+            }
+            qualifiers.add(classes.get(i).get(selectedIndex));
+        }
+
+        return qualifiers;
+    }
+
+    private void updateSelectedSummarizers() {
+        for (int i = 0; i < classes.size(); ++i) {
+            int ss = selectedSummarizers.get(i);
+            if (ss < classes.get(i).size() - 1) {
+                selectedSummarizers.set(i, ss + 1);
+                break;
+            } else if (i < classes.size() - 1) {
+                selectedSummarizers.set(i, -1);
+                for (int j = i + 1; j < classes.size(); ++j) {
+                    int ssj = selectedSummarizers.get(j);
+                    if (ssj < classes.get(j).size() - 1) {
+                        selectedSummarizers.set(j, ssj + 1);
+                        break;
+                    }
+                    selectedSummarizers.set(j, -1);
+                }
+                break;
+            }
+        }
+        resetSelectedQualifiers();
+    }
+
+    private void updateSelectedQualifiers() {
+        for (int i = 0; i < classes.size(); ++i) {
+            int qs = selectedQualifiers.get(i);
+            int ss = selectedSummarizers.get(i);
+            if (ss == -1 && qs < classes.get(i).size() - 1) {
+                selectedQualifiers.set(i, qs + 1);
+                break;
+            } else if (ss == -1 && i < classes.size() - 1) {
+                selectedQualifiers.set(i, -1);
+                for (int j = i + 1; j < classes.size(); ++j) {
+                    int ssj = selectedSummarizers.get(j);
+                    if (ssj != -1) {
+                        continue;
+                    }
+                    int qsj = selectedQualifiers.get(j);
+                    if (qsj < classes.get(j).size() - 1) {
+                        selectedQualifiers.set(j, qsj + 1);
+                        break;
+                    }
+                    selectedQualifiers.set(j, -1);
+                }
+            }
+        }
+    }
+
+    private void resetSelectedQualifiers() {
+        for (int i = 0; i < classes.size(); ++i) {
+            selectedQualifiers.set(i, -1);
+        }
     }
 }
