@@ -43,20 +43,47 @@ public class Summary<S> {
             throw new Exception("Invalid index of summary quality");
         }
 
-        // TODO: calculate other quality measures than T1
         if (!qualitiesCalculated) {
-            float summarizer_sigma_count = 0.0f;
+            int N = subjects.size();
+
             float qualifier_sigma_count = 0.0f;
+            float qualifier_support_count = 0.0f;
+            float[] qualifier_cardinalities;
+            if (qualifiers != null) {
+                qualifier_cardinalities = new float[qualifiers.size()];
+            } else {
+                qualifier_cardinalities = new float[1];
+            }
+
+            float summarizer_sigma_count = 0.0f;
             float summarizer_and_qualifier_sigma_count = 0.0f;
+            float[] summarizer_cardinalities = new float[summarizers.size()];
+            int[] summarizer_support_counts = new int[summarizers.size()];
+
+            int quantifier_support_count = 0;
+            float quantifier_cardinality = 0.0f;
+
+            int t = 0;
+            int h = 0;
+
+            int iter = 0;
 
             for (S subject : subjects) {
                 float summarizer_grade = 1.0f;
                 float summarizer_qualifier_grade = 1.0f;
-                for (var summarizer : summarizers) {
+
+                for (int i = 0; i < summarizers.size(); ++i) {
+                    float grade = summarizers.get(i).qualify(subject);
+                    summarizer_cardinalities[i] += grade;
+
                     summarizer_grade = (float)Math.min(
                         summarizer_grade,
-                        summarizer.qualify(subject)
+                        grade
                     );
+
+                    if (grade > 0.0f) {
+                        summarizer_support_counts[i] += 1;
+                    }
 
                     if (qualifiers != null) {
                         summarizer_qualifier_grade = (float)Math.min(
@@ -67,12 +94,15 @@ public class Summary<S> {
                 }
                 summarizer_sigma_count += summarizer_grade;
 
+                float qualifier_grade = 1.0f;
                 if (qualifiers != null) {
-                    float qualifier_grade = 1.0f;
-                    for (var qualifier : qualifiers) {
+                    for (int i = 0; i < qualifiers.size(); ++i) {
+                        float grade = qualifiers.get(i).qualify(subject);
+                        qualifier_cardinalities[i] += grade;
+
                         qualifier_grade = (float)Math.min(
                             qualifier_grade,
-                            qualifier.qualify(subject)
+                            grade
                         );
 
                         summarizer_qualifier_grade = (float)Math.min(
@@ -81,9 +111,27 @@ public class Summary<S> {
                         );
                     }
                     qualifier_sigma_count += qualifier_grade;
+
+                    if (qualifier_grade > 0.0) {
+                        qualifier_support_count += 1;
+                    }
                 }
                 summarizer_and_qualifier_sigma_count
                     += summarizer_qualifier_grade;
+
+                if ((qualifiers != null
+                        && summarizer_grade > 0.0
+                        && qualifier_grade > 0.0)
+                    || (qualifiers == null && summarizer_grade > 0.0)
+                ) {
+                    t += 1;
+                }
+
+                if ((qualifiers != null && summarizer_grade > 0.0)
+                    || qualifiers == null
+                ) {
+                    h += 1;
+                }
 
                 if (qualifiers != null) {
                     qualities[0] = relativeQuantifier
@@ -91,14 +139,80 @@ public class Summary<S> {
                             / qualifier_sigma_count);
                 } else if (relativeQuantifier != null) {
                     qualities[0] = relativeQuantifier
-                        .grade(summarizer_sigma_count / (float)subjects.size());
+                        .grade(summarizer_sigma_count / (float)N);
                 } else if (absoluteQuantifier != null) {
                     qualities[0] = absoluteQuantifier
                         .grade(Math.round(summarizer_sigma_count));
                 } else {
                     assert(false);
                 }
+
+                float quantifier_grade = 0.0f;
+                if (relativeQuantifier != null) {
+                    quantifier_grade = relativeQuantifier.grade(
+                        iter / (float)N
+                    );
+                } else if (absoluteQuantifier != null) {
+                    quantifier_grade = absoluteQuantifier.grade(iter);
+                } else {
+                    assert(false);
+                }
+
+                if (quantifier_grade > 0.0) {
+                    quantifier_support_count += 1;
+                }
+                quantifier_cardinality += quantifier_grade;
+
+                iter += 1;
             }
+
+            // T2
+            assert(summarizer_support_counts.length > 0);
+            float in_sj_prod
+                = summarizer_support_counts[0] / (float)N;
+            float sj_card_prod
+                = summarizer_cardinalities[0] / (float)N;
+            for (int i = 1; i < summarizers.size(); ++i) {
+                in_sj_prod
+                    *= summarizer_support_counts[i] / (float)N;
+                sj_card_prod
+                    *= summarizer_cardinalities[0] / (float)N;
+            }
+            qualities[1]
+                = (float)Math.pow(in_sj_prod, 1 / (float)summarizers.size());
+            qualities[1] = 1 - qualities[1];
+
+            qualities[2] = t / (float)h;
+            qualities[3] = Math.abs(in_sj_prod - qualities[2]);
+            qualities[4] = 2*(float)Math.pow(
+                0.5f, summarizers.size()
+                    + ((qualifiers != null) ? qualifiers.size() : 0)
+            );
+
+            // T6
+            if (relativeQuantifier != null) {
+                qualities[5]
+                    = 1 - quantifier_support_count / (float)N;
+            } else if (absoluteQuantifier != null) {
+                qualities[5]
+                    = quantifier_support_count / (float)N;
+            } else {
+                assert(false);
+            }
+
+            qualities[6] = 1 - quantifier_cardinality / (float)N;
+            qualities[7] = 1 - (float)Math.pow(
+                sj_card_prod, 1 / (float)summarizers.size()
+            );
+            qualities[8] = 1 - qualifier_support_count / (float)N;
+
+            // T10
+            float wj_card_prod = qualifier_cardinalities[0] / (float)N;
+            for (int i = 1; i < qualifier_cardinalities.length; ++i) {
+                wj_card_prod *= qualifier_cardinalities[i] / (float)N;
+            }
+            qualities[9] = 1 - (float)Math.pow(
+                wj_card_prod, 1 / (float)qualifier_cardinalities.length);
 
             qualitiesCalculated = true;
         }
