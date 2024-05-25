@@ -11,14 +11,12 @@ public class AbsoluteQuantifier extends Quantifier<Integer> {
     public AbsoluteQuantifier(
         String label,
         Membership<Integer> membership,
-        DiscreteInterval universum
+        int cardinality
     ) throws Exception {
-        super(new DiscreteFuzzySet(universum, membership));
+        super(new DiscreteFuzzySet(
+            new DiscreteInterval(0, cardinality), membership
+        ));
         this.label = label;
-        if (universum.getStart() != 0) {
-            throw new Exception("Invalid universum of absolute quantifier: "
-                + "Should start at 0");
-        }
     }
 
     @Override
