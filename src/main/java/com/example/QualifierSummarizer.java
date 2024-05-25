@@ -32,6 +32,14 @@ public class QualifierSummarizer<S> implements LabeledFuzzySet<Float> {
         return featureExtractor.getFeatureName();
     }
 
+    public String getPreQualifierVerb() {
+        return featureExtractor.getPreQualifierVerb();
+    }
+
+    public String getPreSummarizerVerb() {
+        return featureExtractor.getPreSummarizerVerb();
+    }
+
     @Override
     public float grade(Float x) {
         return fuzzySet.grade(x);

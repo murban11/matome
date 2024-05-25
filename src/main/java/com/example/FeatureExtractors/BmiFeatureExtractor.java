@@ -13,7 +13,17 @@ public class BmiFeatureExtractor implements FeatureExtractor<Subject> {
 
     @Override
     public String getFeatureName() {
-        return "BMI";
+        return "(BMI)";
+    }
+
+    @Override
+    public String getPreQualifierVerb() {
+        return "being";
+    }
+
+    @Override
+    public String getPreSummarizerVerb() {
+        return "are";
     }
 
     @Override

@@ -13,7 +13,17 @@ public class SystolicFeatureExtractor implements FeatureExtractor<Subject> {
 
     @Override
     public String getFeatureName() {
-        return "systolic";
+        return "(systolic)";
+    }
+
+    @Override
+    public String getPreQualifierVerb() {
+        return "having";
+    }
+
+    @Override
+    public String getPreSummarizerVerb() {
+        return "have";
     }
 
     @Override

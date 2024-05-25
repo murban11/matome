@@ -13,7 +13,17 @@ public class AgeFeatureExtractor implements FeatureExtractor<Subject> {
 
     @Override
     public String getFeatureName() {
-        return "age";
+        return "";
+    }
+
+    @Override
+    public String getPreQualifierVerb() {
+        return "being";
+    }
+
+    @Override
+    public String getPreSummarizerVerb() {
+        return "are";
     }
 
     @Override

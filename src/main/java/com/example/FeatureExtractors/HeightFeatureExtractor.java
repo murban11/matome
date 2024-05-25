@@ -13,7 +13,17 @@ public class HeightFeatureExtractor implements FeatureExtractor<Subject> {
 
     @Override
     public String getFeatureName() {
-        return "height";
+        return "";
+    }
+
+    @Override
+    public String getPreQualifierVerb() {
+        return "being";
+    }
+
+    @Override
+    public String getPreSummarizerVerb() {
+        return "are";
     }
 
     @Override

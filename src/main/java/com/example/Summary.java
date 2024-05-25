@@ -108,12 +108,21 @@ public class Summary<S> {
 
     public String toString(String subjectsName) {
         StringBuilder sb = new StringBuilder(
-            (relativeQuantifier != null)
-                ? relativeQuantifier.getLabel() : absoluteQuantifier.getLabel() 
+            ((relativeQuantifier != null)
+                ? relativeQuantifier.getLabel()
+                    : absoluteQuantifier.getLabel())
             + " " + subjectsName
         );
+        // TODO: Refactor the code below to eliminate duplication.
         if (qualifiers != null) {
-            sb.append(" being/having ");
+            // TODO: Group qualifiers based on their `preQualifierVerb` and
+            // print all the qualifiers from the first group before printing
+            // qualifiers from the second group, so that we do not have
+            // sequences like this: ... are ... and being ... and are ...
+            assert(qualifiers.size() > 0);
+            String preQualifierVerb
+                = qualifiers.getFirst().getPreQualifierVerb();
+            sb.append(" " + preQualifierVerb + " ");
             for (int i = 0; i < qualifiers.size(); ++i) {
                 if (i == 1 && qualifiers.size() == 2) {
                     sb.append(" ");
@@ -124,11 +133,28 @@ public class Summary<S> {
                 if (i > 0 && i == qualifiers.size() - 1) {
                     sb.append("and ");
                 }
+
+                if (i > 0 && qualifiers
+                        .get(i)
+                        .getPreQualifierVerb()
+                        .equals(preQualifierVerb)
+                ) {
+                    preQualifierVerb = qualifiers.get(i).getPreQualifierVerb();
+                    sb.append(preQualifierVerb + " ");
+                }
+
                 sb.append(qualifiers.get(i).getLabel());
-                // TODO: Add feature name
+                if (!qualifiers.get(i).getFeatureName().isEmpty()) {
+                    sb.append(" " + qualifiers.get(i).getFeatureName());
+                }
             }
         }
-        sb.append(" are/have ");
+        // TODO: Group summarizers based on their `preSummarizerVerb`,
+        // analogiously to the qualifiers.
+        assert(summarizers.size() > 0);
+        String preSummarizerVerb
+            = summarizers.getFirst().getPreSummarizerVerb();
+        sb.append(" " + preSummarizerVerb + " ");
         for (int i = 0; i < summarizers.size(); ++i) {
             if (i == 1 && summarizers.size() == 2) {
                 sb.append(" ");
@@ -139,8 +165,20 @@ public class Summary<S> {
             if (i > 0 && i == summarizers.size() - 1) {
                 sb.append("and ");
             }
+
+            if (i > 0 && summarizers
+                    .get(i)
+                    .getPreSummarizerVerb()
+                    .equals(preSummarizerVerb)
+            ) {
+                preSummarizerVerb = summarizers.get(i).getPreSummarizerVerb();
+                sb.append(preSummarizerVerb + " ");
+            }
+
             sb.append(summarizers.get(i).getLabel());
-            // TODO: Add feature name
+            if (!summarizers.get(i).getFeatureName().isEmpty()) {
+                sb.append(" " + summarizers.get(i).getFeatureName());
+            }
         }
 
         return sb.toString();

@@ -17,6 +17,16 @@ public class SitUpsCountFeatureExtractor implements FeatureExtractor<Subject> {
     }
 
     @Override
+    public String getPreQualifierVerb() {
+        return "having";
+    }
+
+    @Override
+    public String getPreSummarizerVerb() {
+        return "have";
+    }
+
+    @Override
     public ContinuousInterval getUniversum() {
         ContinuousInterval universum = null;
         try {
