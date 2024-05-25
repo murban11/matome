@@ -1,6 +1,7 @@
 package com.example;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class SummaryGenerator<S> {
@@ -46,7 +47,9 @@ public class SummaryGenerator<S> {
             }
         }
 
-        // TODO: Sort summaries based on their quality
+        SummaryQualityComparator<S> comparator
+            = new SummaryQualityComparator<>(subjects, qualityWeights);
+        Collections.sort(summaries, Collections.reverseOrder(comparator));
 
         return summaries;
     }
