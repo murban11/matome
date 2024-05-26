@@ -1,5 +1,6 @@
 package com.example.FeatureExtractors;
 
+import com.example.Feature;
 import com.example.FeatureExtractor;
 import com.example.Subject;
 import com.example.FuzzyLogic.ContinuousInterval;
@@ -12,7 +13,12 @@ public class SitAndBendForwardFeatureExtractor implements FeatureExtractor<Subje
     }
 
     @Override
-    public String getFeatureName() {
+    public Feature getFeature() {
+        return Feature.SIT_AND_BEND_FORWARD;
+    }
+
+    @Override
+    public String getPostLabelStr() {
         return "sit and bend forward";
     }
 

@@ -3,18 +3,18 @@ package com.example;
 import java.util.Comparator;
 import java.util.List;
 
-public class SummaryQualityComparator<S> implements Comparator<Summary<S>> {
+public class SummaryQualityComparator implements Comparator<Summary> {
 
-    private List<S> subjects;
+    private List<Subject> subjects;
     private float[] weights;
 
-    public SummaryQualityComparator(List<S> subjects, float[] weights) {
+    public SummaryQualityComparator(List<Subject> subjects, float[] weights) {
         this.subjects = subjects;
         this.weights = weights;
     }
 
     @Override
-    public int compare(Summary<S> s1, Summary<S> s2) {
+    public int compare(Summary s1, Summary s2) {
         float q1 = 0.0f;
         float q2 = 0.0f;
 

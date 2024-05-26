@@ -1,5 +1,6 @@
 package com.example.FeatureExtractors;
 
+import com.example.Feature;
 import com.example.FeatureExtractor;
 import com.example.Subject;
 import com.example.FuzzyLogic.ContinuousInterval;
@@ -12,7 +13,12 @@ public class BroadJumpFeatureExtractor implements FeatureExtractor<Subject> {
     }
 
     @Override
-    public String getFeatureName() {
+    public Feature getFeature() {
+        return Feature.BROAD_JUMP;
+    }
+
+    @Override
+    public String getPostLabelStr() {
         return "broad jump";
     }
 

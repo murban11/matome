@@ -3,19 +3,19 @@ package com.example;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Summary<S> {
+public class Summary {
     public static final int QUALITIES_COUNT = 10;
 
     private RelativeQuantifier relativeQuantifier = null;
     private AbsoluteQuantifier absoluteQuantifier = null;
-    private List<QualifierSummarizer<S>> qualifiers = null;
-    private List<QualifierSummarizer<S>> summarizers;
+    private List<QualifierSummarizer> qualifiers = null;
+    private List<QualifierSummarizer> summarizers;
     private float[] qualities = new float[QUALITIES_COUNT];
     private boolean qualitiesCalculated = false;
 
     public Summary(
         RelativeQuantifier quantifier,
-        List<QualifierSummarizer<S>> summarizers
+        List<QualifierSummarizer> summarizers
     ) {
         this.relativeQuantifier = quantifier;
         this.summarizers = new ArrayList<>(summarizers);
@@ -23,7 +23,7 @@ public class Summary<S> {
 
     public Summary(
         AbsoluteQuantifier quantifier,
-        List<QualifierSummarizer<S>> summarizers
+        List<QualifierSummarizer> summarizers
     ) {
         this.absoluteQuantifier = quantifier;
         this.summarizers = new ArrayList<>(summarizers);
@@ -31,14 +31,14 @@ public class Summary<S> {
 
     public Summary(
         RelativeQuantifier quantifier,
-        List<QualifierSummarizer<S>> qualifiers,
-        List<QualifierSummarizer<S>> summarizers
+        List<QualifierSummarizer> qualifiers,
+        List<QualifierSummarizer> summarizers
     ) {
         this(quantifier, summarizers);
         this.qualifiers = new ArrayList<>(qualifiers);
     }
 
-    public float getQuality(int n, List<S> subjects) throws Exception {
+    public float getQuality(int n, List<Subject> subjects) throws Exception {
         if (n < 0 || n >= QUALITIES_COUNT) {
             throw new Exception("Invalid index of summary quality");
         }
@@ -68,7 +68,7 @@ public class Summary<S> {
 
             int iter = 0;
 
-            for (S subject : subjects) {
+            for (Subject subject : subjects) {
                 float summarizer_grade = 1.0f;
                 float summarizer_qualifier_grade = 1.0f;
 
@@ -258,8 +258,8 @@ public class Summary<S> {
                 }
 
                 sb.append(qualifiers.get(i).getLabel());
-                if (!qualifiers.get(i).getFeatureName().isEmpty()) {
-                    sb.append(" " + qualifiers.get(i).getFeatureName());
+                if (!qualifiers.get(i).getPostLabelStr().isEmpty()) {
+                    sb.append(" " + qualifiers.get(i).getPostLabelStr());
                 }
             }
         }
@@ -290,8 +290,8 @@ public class Summary<S> {
             }
 
             sb.append(summarizers.get(i).getLabel());
-            if (!summarizers.get(i).getFeatureName().isEmpty()) {
-                sb.append(" " + summarizers.get(i).getFeatureName());
+            if (!summarizers.get(i).getPostLabelStr().isEmpty()) {
+                sb.append(" " + summarizers.get(i).getPostLabelStr());
             }
         }
 

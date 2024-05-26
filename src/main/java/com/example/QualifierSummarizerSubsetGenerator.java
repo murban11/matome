@@ -3,13 +3,13 @@ package com.example;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QualifierSummarizerSubsetGenerator<S> {
+public class QualifierSummarizerSubsetGenerator {
 
     /*
      * This list contains qualifiers/summarizers splitted in classes based
      * on the feature they are referring to.
      */
-    private List<List<QualifierSummarizer<S>>> classes;
+    private List<List<QualifierSummarizer>> classes;
 
     /*
      * Contains indexes of summarizers selected in each of the classes.
@@ -26,20 +26,20 @@ public class QualifierSummarizerSubsetGenerator<S> {
     private List<Integer> selectedQualifiers;
 
     public QualifierSummarizerSubsetGenerator(
-        List<QualifierSummarizer<S>> qualifiersSummarizers
+        List<QualifierSummarizer> qualifiersSummarizers
     ) {
         this.classes = new ArrayList<>();
-        for (QualifierSummarizer<S> qs : qualifiersSummarizers) {
+        for (QualifierSummarizer qs : qualifiersSummarizers) {
             boolean classFound = false;
             for (var c : classes) {
-                if (qs.getFeatureName().equals(c.get(0).getFeatureName())) {
+                if (qs.getPostLabelStr().equals(c.get(0).getPostLabelStr())) {
                     c.add(qs);
                     classFound = true;
                     break;
                 }
             }
             if (!classFound) {
-                List<QualifierSummarizer<S>> newClass = new ArrayList<>();
+                List<QualifierSummarizer> newClass = new ArrayList<>();
                 newClass.add(qs);
                 classes.add(newClass);
             }
@@ -74,10 +74,10 @@ public class QualifierSummarizerSubsetGenerator<S> {
         return false;
     }
 
-    public List<QualifierSummarizer<S>> nextSummarizers() {
+    public List<QualifierSummarizer> nextSummarizers() {
         updateSelectedSummarizers();
 
-        List<QualifierSummarizer<S>> summarizers
+        List<QualifierSummarizer> summarizers
             = new ArrayList<>(classes.size());
 
         for (int i = 0; i < classes.size(); ++i) {
@@ -91,10 +91,10 @@ public class QualifierSummarizerSubsetGenerator<S> {
         return summarizers;
     }
 
-    public List<QualifierSummarizer<S>> nextQualifiers() {
+    public List<QualifierSummarizer> nextQualifiers() {
         updateSelectedQualifiers();
 
-        List<QualifierSummarizer<S>> qualifiers
+        List<QualifierSummarizer> qualifiers
             = new ArrayList<>(classes.size());
 
         for (int i = 0; i < classes.size(); ++i) {

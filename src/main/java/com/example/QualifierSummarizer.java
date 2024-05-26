@@ -5,16 +5,16 @@ import com.example.FuzzyLogic.CrispSet;
 import com.example.FuzzyLogic.Interval;
 import com.example.FuzzyLogic.Membership;
 
-public class QualifierSummarizer<S> implements LabeledFuzzySet<Float> {
+public class QualifierSummarizer implements LabeledFuzzySet<Float> {
 
     private String label;
-    private FeatureExtractor<S> featureExtractor;
+    private FeatureExtractor<Subject> featureExtractor;
     private ContinuousFuzzySet fuzzySet;
 
     public QualifierSummarizer(
         String label,
 		Membership<Float> membership,
-		FeatureExtractor<S> featureExtractor
+		FeatureExtractor<Subject> featureExtractor
     ) {
         this.label = label;
         this.featureExtractor = featureExtractor;
@@ -24,12 +24,16 @@ public class QualifierSummarizer<S> implements LabeledFuzzySet<Float> {
         );
     }
 
-    public float qualify(S subject) {
+    public float qualify(Subject subject) {
         return grade(featureExtractor.extract(subject));
     }
 
-    public String getFeatureName() {
-        return featureExtractor.getFeatureName();
+    public Feature getFeature() {
+        return featureExtractor.getFeature();
+    }
+
+    public String getPostLabelStr() {
+        return featureExtractor.getPostLabelStr();
     }
 
     public String getPreQualifierVerb() {
@@ -78,5 +82,10 @@ public class QualifierSummarizer<S> implements LabeledFuzzySet<Float> {
     @Override
     public String getLabel() {
         return label;
+    }
+
+    @Override
+    public Membership<Float> getMembership() {
+        return fuzzySet.getMembership();
     }
 }

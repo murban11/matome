@@ -4,7 +4,8 @@ import com.example.FuzzyLogic.ContinuousInterval;
 
 public interface FeatureExtractor<S> {
     float extract(S subject);
-    String getFeatureName();
+    Feature getFeature();
+    String getPostLabelStr();
     String getPreQualifierVerb();
     String getPreSummarizerVerb();
     ContinuousInterval getUniversum();

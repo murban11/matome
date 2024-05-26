@@ -7,4 +7,5 @@ public interface FuzzySet<T> extends CrispSet<T, Float> {
     CrispSet<T, T> support() throws Exception;
     float degreeOfImprecision();
     Interval<T> getUniversum();
+    Membership<T> getMembership();
 }

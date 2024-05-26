@@ -148,4 +148,9 @@ public class DiscreteFuzzySet implements FuzzySet<Integer> {
 
         return ret;
     }
+
+    @Override
+    public Membership<Integer> getMembership() {
+        return membership;
+    }
 }

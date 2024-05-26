@@ -4,19 +4,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class SummaryGenerator<S> {
+public class SummaryGenerator {
     private List<RelativeQuantifier> relativeQuantifiers = null;
     private List<AbsoluteQuantifier> absoluteQuantifiers = null;
-    private List<QualifierSummarizer<S>> qualifierSummarizers;
+    private List<QualifierSummarizer> qualifierSummarizers;
     private float[] qualityWeights;
-    private List<S> subjects;
+    private List<Subject> subjects;
 
     public SummaryGenerator(
         List<RelativeQuantifier> relativeQuantifiers,
         List<AbsoluteQuantifier> absoluteQuantifiers,
-        List<QualifierSummarizer<S>> qualifierSummarizers,
+        List<QualifierSummarizer> qualifierSummarizers,
         float[] qualityWeights,
-        List<S> subjects
+        List<Subject> subjects
     ) throws Exception {
         if (relativeQuantifiers != null) {
             this.relativeQuantifiers = new ArrayList<>(relativeQuantifiers);
@@ -33,8 +33,8 @@ public class SummaryGenerator<S> {
         this.subjects = new ArrayList<>(subjects);
     }
 
-    public List<Summary<S>> generate() {
-        List<Summary<S>> summaries = new ArrayList<>();
+    public List<Summary> generate() {
+        List<Summary> summaries = new ArrayList<>();
 
         if (relativeQuantifiers != null) {
             for (var quantifier : relativeQuantifiers) {
@@ -47,43 +47,43 @@ public class SummaryGenerator<S> {
             }
         }
 
-        SummaryQualityComparator<S> comparator
-            = new SummaryQualityComparator<>(subjects, qualityWeights);
+        SummaryQualityComparator comparator
+            = new SummaryQualityComparator(subjects, qualityWeights);
         Collections.sort(summaries, Collections.reverseOrder(comparator));
 
         return summaries;
     }
 
     private void generate(
-        List<Summary<S>> summaries,
+        List<Summary> summaries,
         Quantifier<?> quantifier
     ) {
-        QualifierSummarizerSubsetGenerator<S> generator
-            = new QualifierSummarizerSubsetGenerator<>(qualifierSummarizers);
+        QualifierSummarizerSubsetGenerator generator
+            = new QualifierSummarizerSubsetGenerator(qualifierSummarizers);
 
         while (generator.hasNextSummarizers()) {
-            List<QualifierSummarizer<S>> summarizers
+            List<QualifierSummarizer> summarizers
                 = generator.nextSummarizers();
 
             if (quantifier instanceof RelativeQuantifier) {
                 summaries.add(
-                    new Summary<S>((RelativeQuantifier)quantifier, summarizers)
+                    new Summary((RelativeQuantifier)quantifier, summarizers)
                 );
             } else if (quantifier instanceof AbsoluteQuantifier) {
                 summaries.add(
-                    new Summary<S>((AbsoluteQuantifier)quantifier, summarizers)
+                    new Summary((AbsoluteQuantifier)quantifier, summarizers)
                 );
             } else {
                 assert(false);
             }
 
             while (generator.hasNextQualifiers()) {
-                List<QualifierSummarizer<S>> qualifiers
+                List<QualifierSummarizer> qualifiers
                     = generator.nextQualifiers();
 
                 if (qualifiers.size() > 0) {
                     summaries.add(
-                        new Summary<S>(
+                        new Summary(
                             (RelativeQuantifier)quantifier,
                             qualifiers,
                             summarizers

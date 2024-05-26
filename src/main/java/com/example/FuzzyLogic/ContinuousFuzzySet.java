@@ -145,4 +145,9 @@ public class ContinuousFuzzySet implements FuzzySet<Float> {
     public Interval<Float> getUniversum() {
         return universum;
     }
+
+    @Override
+    public Membership<Float> getMembership() {
+        return membership;
+    }
 }

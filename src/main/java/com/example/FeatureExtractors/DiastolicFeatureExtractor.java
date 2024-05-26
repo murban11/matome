@@ -1,5 +1,6 @@
 package com.example.FeatureExtractors;
 
+import com.example.Feature;
 import com.example.FeatureExtractor;
 import com.example.Subject;
 import com.example.FuzzyLogic.ContinuousInterval;
@@ -12,7 +13,12 @@ public class DiastolicFeatureExtractor implements FeatureExtractor<Subject> {
     }
 
     @Override
-    public String getFeatureName() {
+    public Feature getFeature() {
+        return Feature.DIASTOLIC;
+    }
+
+    @Override
+    public String getPostLabelStr() {
         return "(systolic)";
     }
 
