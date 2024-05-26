@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Summary {
-    public static final int QUALITIES_COUNT = 10;
+    public static final int QUALITIES_COUNT = 11;
 
     private RelativeQuantifier relativeQuantifier = null;
     private AbsoluteQuantifier absoluteQuantifier = null;
@@ -213,6 +213,11 @@ public class Summary {
             }
             qualities[9] = 1 - (float)Math.pow(
                 wj_card_prod, 1 / (float)qualifier_cardinalities.length);
+            if (qualifiers != null) {
+                qualities[10] = 2*(float)Math.pow(0.5f, qualifiers.size());
+            } else {
+                qualities[10] = 0;
+            }
 
             qualitiesCalculated = true;
         }

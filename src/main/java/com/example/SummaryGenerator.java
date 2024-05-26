@@ -73,6 +73,10 @@ public class SummaryGenerator {
                 summaries.add(
                     new Summary((AbsoluteQuantifier)quantifier, summarizers)
                 );
+
+                // Do not generate summaries of the second form for absolute
+                // qualifiers.
+                continue;
             } else {
                 assert(false);
             }
