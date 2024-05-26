@@ -11,7 +11,6 @@ public class DiscreteTrapezoidalMembership
     private Integer a, b, c, d;
 
     public DiscreteTrapezoidalMembership(
-        DiscreteInterval interval,
         Integer a, Integer b, Integer c, Integer d
     ) {
         // Make the following relation to be always fullfilled:
