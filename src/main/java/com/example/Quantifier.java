@@ -3,6 +3,7 @@ package com.example;
 import com.example.FuzzyLogic.CrispSet;
 import com.example.FuzzyLogic.FuzzySet;
 import com.example.FuzzyLogic.Interval;
+import com.example.FuzzyLogic.Membership;
 
 public abstract class Quantifier<T> implements LabeledFuzzySet<T> {
     private FuzzySet<T> fuzzySet;
@@ -44,5 +45,10 @@ public abstract class Quantifier<T> implements LabeledFuzzySet<T> {
     @Override
     public boolean contains(T x) {
         return fuzzySet.contains(x);
+    }
+
+    @Override
+    public Membership<T> getMembership() {
+        return fuzzySet.getMembership();
     }
 }
