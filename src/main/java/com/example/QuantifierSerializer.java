@@ -39,15 +39,13 @@ public class QuantifierSerializer<T> extends StdSerializer<Quantifier<T>> {
         Membership<T> membership = quantifier.getMembership();
         if (membership instanceof TrapezoidalMembership) {
             generator.writeStringField("membership", "trapezoidal");
-            generator.writeFieldName("params");
-            generator.writeObject(membership);
         } else if (membership instanceof GaussianMembership) {
             generator.writeStringField("membership", "gaussian");
-            generator.writeFieldName("params");
-            generator.writeObject(membership);
         } else {
             assert(false);
         }
+        generator.writeFieldName("params");
+        generator.writeObject(membership);
 
         generator.writeEndObject();
     }
