@@ -1,7 +1,6 @@
 package com.example;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class SummaryGenerator {
@@ -33,8 +32,8 @@ public class SummaryGenerator {
         this.subjects = new ArrayList<>(subjects);
     }
 
-    public List<Summary> generate() {
-        List<Summary> summaries = new ArrayList<>();
+    public List<Pair<Float, String>> generate() {
+        List<Pair<Float, String>> summaries = new ArrayList<>();
 
         if (relativeQuantifiers != null) {
             for (var quantifier : relativeQuantifiers) {
@@ -47,15 +46,28 @@ public class SummaryGenerator {
             }
         }
 
-        SummaryQualityComparator comparator
-            = new SummaryQualityComparator(subjects, qualityWeights);
-        Collections.sort(summaries, Collections.reverseOrder(comparator));
+        summaries.sort((p1, p2) -> p2.first.compareTo(p1.first));
 
         return summaries;
     }
 
+    private float calcQuality(Summary summary) {
+        float quality = 0.0f;
+
+        for (int i = 0; i < qualityWeights.length; ++i) {
+            try {
+                quality += qualityWeights[i] * summary.getQuality(i, subjects);
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
+
+        return quality;
+    }
+
     private void generate(
-        List<Summary> summaries,
+        List<Pair<Float, String>> summaries,
         Quantifier<?> quantifier
     ) {
         QualifierSummarizerSubsetGenerator generator
@@ -66,13 +78,23 @@ public class SummaryGenerator {
                 = generator.nextSummarizers();
 
             if (quantifier instanceof RelativeQuantifier) {
-                summaries.add(
-                    new Summary((RelativeQuantifier)quantifier, summarizers)
+                Summary summary = new Summary(
+                    (RelativeQuantifier)quantifier,
+                    summarizers
                 );
+                summaries.add(new Pair<Float, String>(
+                    calcQuality(summary),
+                    summary.toString()
+                ));
             } else if (quantifier instanceof AbsoluteQuantifier) {
-                summaries.add(
-                    new Summary((AbsoluteQuantifier)quantifier, summarizers)
+                Summary summary = new Summary(
+                    (AbsoluteQuantifier)quantifier,
+                    summarizers
                 );
+                summaries.add(new Pair<Float, String>(
+                    calcQuality(summary),
+                    summary.toString()
+                ));
 
                 // Do not generate summaries of the second form for absolute
                 // qualifiers.
@@ -86,13 +108,15 @@ public class SummaryGenerator {
                     = generator.nextQualifiers();
 
                 if (qualifiers.size() > 0) {
-                    summaries.add(
-                        new Summary(
-                            (RelativeQuantifier)quantifier,
-                            qualifiers,
-                            summarizers
-                        )
+                    Summary summary = new Summary(
+                        (RelativeQuantifier)quantifier,
+                        qualifiers,
+                        summarizers
                     );
+                    summaries.add(new Pair<Float, String>(
+                        calcQuality(summary),
+                        summary.toString()
+                    ));
                 }
             }
         }
