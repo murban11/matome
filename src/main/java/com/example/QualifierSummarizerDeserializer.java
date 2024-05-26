@@ -82,7 +82,7 @@ public class QualifierSummarizerDeserializer extends StdDeserializer<QualifierSu
                     (float)params.get("a").asDouble(),
                     (float)params.get("b").asDouble(),
                     (float)params.get("c").asDouble(),
-                    (float)params.get("c").asDouble()
+                    (float)params.get("d").asDouble()
                 );
             } else if (membershipType.equals("gaussian")) {
                 membership = new ContinuousGaussianMembership(
