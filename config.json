@@ -266,7 +266,7 @@
         {
             "label": "normal weight",
             "feature": "bmi",
-            "mambership": "trapezoidal",
+            "membership": "trapezoidal",
             "params": {
                 "a": 16.5,
                 "b": 20.5,
@@ -277,7 +277,7 @@
         {
             "label": "overweight",
             "feature": "bmi",
-            "mambership": "trapezoidal",
+            "membership": "trapezoidal",
             "params": {
                 "a": 23.0,
                 "b": 27.0,
@@ -288,7 +288,7 @@
         {
             "label": "obese",
             "feature": "bmi",
-            "mambership": "trapezoidal",
+            "membership": "trapezoidal",
             "params": {
                 "a": 0.0,
                 "b": 0.0,
@@ -299,7 +299,7 @@
         {
             "label": "low",
             "feature": "body fat",
-            "mambership": "trapezoidal",
+            "membership": "trapezoidal",
             "params": {
                 "a": 0.0,
                 "b": 0.0,
@@ -310,7 +310,7 @@
         {
             "label": "ideal",
             "feature": "body fat",
-            "mambership": "trapezoidal",
+            "membership": "trapezoidal",
             "params": {
                 "a": -2.0,
                 "b": 14.0,
@@ -321,7 +321,7 @@
         {
             "label": "average",
             "feature": "body fat",
-            "mambership": "trapezoidal",
+            "membership": "trapezoidal",
             "params": {
                 "a": 12.0,
                 "b": 20.0,
@@ -332,7 +332,7 @@
         {
             "label": "high",
             "feature": "body fat",
-            "mambership": "trapezoidal",
+            "membership": "trapezoidal",
             "params": {
                 "a": 16.0,
                 "b": 24.0,
