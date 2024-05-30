@@ -12,6 +12,9 @@ public class SummaryGenerator {
     private float[] qualityWeights;
     private List<Subject> subjects;
 
+    private List<Subject> males;
+    private List<Subject> females;
+
     public SummaryGenerator(
         List<RelativeQuantifier> relativeQuantifiers,
         List<AbsoluteQuantifier> absoluteQuantifiers,
@@ -32,6 +35,16 @@ public class SummaryGenerator {
         }
         this.qualityWeights = qualityWeights.clone();
         this.subjects = new ArrayList<>(subjects);
+
+        this.males = new ArrayList<>();
+        this.females = new ArrayList<>();
+        for (var s : subjects) {
+            if (s.getGender() == Subject.Gender.MALE) {
+                this.males.add(s);
+            } else {
+                this.females.add(s);
+            }
+        }
     }
 
     public List<Pair<Float, String>> generate() throws Exception {
@@ -73,6 +86,18 @@ public class SummaryGenerator {
                 summaries.add(new Pair<Float, String>(
                     summary.getQuality(subjects),
                     summary.toString(SUBJECT_NAME)
+                ));
+                MultiSubjectSummary msSummary = new MultiSubjectSummary(
+                    (RelativeQuantifier)quantifier,
+                    summarizers
+                );
+                summaries.add(new Pair<Float, String>(
+                    msSummary.getQuality(males, females),
+                    msSummary.toString("males", "females")
+                ));
+                summaries.add(new Pair<Float, String>(
+                    msSummary.getQuality(females, males),
+                    msSummary.toString("females", "males")
                 ));
             } else if (quantifier instanceof AbsoluteQuantifier) {
                 Summary summary = new Summary(
