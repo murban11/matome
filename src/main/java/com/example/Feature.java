@@ -4,7 +4,7 @@ public enum Feature {
     AGE                     ("age"),
     HEIGHT                  ("height"),
     BMI                     ("bmi"),
-    MODIFIED_BODY_FAT       ("modified body fat"),
+    MODIFIED_BODY_FAT       ("body fat"),
     DIASTOLIC               ("diastolic"),
     SYSTOLIC                ("systolic"),
     GRIP_FORCE              ("grip force"),
