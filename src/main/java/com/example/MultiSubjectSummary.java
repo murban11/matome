@@ -44,7 +44,7 @@ public class MultiSubjectSummary {
     public float getQuality(
         List<Subject> s1, List<Subject> s2
     ) throws Exception {
-        if (form != FORM.F1 && form != FORM.F2) {
+        if (form == FORM.F4) {
             throw new UnsupportedOperationException("Not implemented yet");
         }
 
@@ -117,6 +117,13 @@ public class MultiSubjectSummary {
                         + invM2 * s2_summarizer_and_qualifier_sigma_count
                 )
             );
+        } else if (form == FORM.F3) {
+            quality = quantifier.grade(
+                invM1 * s1_summarizer_and_qualifier_sigma_count / (
+                    invM1 * s1_summarizer_and_qualifier_sigma_count
+                        + invM2 * s2_summarizer_sigma_count
+                )
+            );
         }
 
         return quality;
@@ -137,7 +144,7 @@ public class MultiSubjectSummary {
             sb.append(", compared to " + s2name);
         }
 
-        if (form == FORM.F2) {
+        if (form == FORM.F2 || form == FORM.F3) {
             String preQualifierVerb
                 = qualifiers.getFirst().getPreQualifierVerb();
             sb.append(" " + preQualifierVerb + " ");
@@ -168,6 +175,10 @@ public class MultiSubjectSummary {
             }
 
             sb.append(",");
+        }
+
+        if (form == FORM.F3) {
+            sb.append(" compared to " + s2name + ",");
         }
 
         String preSummarizerVerb

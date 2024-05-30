@@ -148,6 +148,20 @@ public class SummaryGenerator {
                         msSummary.getQuality(females, males),
                         msSummary.toString("females", "males")
                     ));
+                    msSummary = new MultiSubjectSummary(
+                        (RelativeQuantifier)quantifier,
+                        qualifiers,
+                        summarizers,
+                        FORM.F3
+                    );
+                    summaries.add(new Pair<Float, String>(
+                        msSummary.getQuality(males, females),
+                        msSummary.toString("males", "females")
+                    ));
+                    summaries.add(new Pair<Float, String>(
+                        msSummary.getQuality(females, males),
+                        msSummary.toString("females", "males")
+                    ));
                 }
             }
         }
