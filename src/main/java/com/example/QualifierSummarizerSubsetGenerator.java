@@ -109,6 +109,7 @@ public class QualifierSummarizerSubsetGenerator {
     }
 
     private void updateSelectedSummarizers() {
+        resetSelectedQualifiers();
         for (int i = 0; i < classes.size(); ++i) {
             int ss = selectedSummarizers.get(i);
             if (ss < classes.get(i).size() - 1) {
@@ -127,7 +128,6 @@ public class QualifierSummarizerSubsetGenerator {
                 break;
             }
         }
-        resetSelectedQualifiers();
     }
 
     private void updateSelectedQualifiers() {
