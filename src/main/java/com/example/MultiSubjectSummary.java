@@ -31,7 +31,7 @@ public class MultiSubjectSummary {
         List<QualifierSummarizer> summarizers,
         FORM f
     ) throws Exception {
-        if (f != FORM.F2 || f != FORM.F3) {
+        if (f != FORM.F2 && f != FORM.F3) {
             throw new Exception("Invalid multi subject summary arguments");
         }
 
@@ -44,28 +44,41 @@ public class MultiSubjectSummary {
     public float getQuality(
         List<Subject> s1, List<Subject> s2
     ) throws Exception {
-        if (form != FORM.F1) {
+        if (form != FORM.F1 && form != FORM.F2) {
             throw new UnsupportedOperationException("Not implemented yet");
         }
 
         float s1_summarizer_sigma_count = 0.0f;
         float s2_summarizer_sigma_count = 0.0f;
+        float s1_summarizer_and_qualifier_sigma_count = 0.0f;
+        float s2_summarizer_and_qualifier_sigma_count = 0.0f;
 
         for (Subject subject : s1) {
             float summarizer_grade = 1.0f;
+            float summarizer_qualifier_grade = 1.0f;
 
             for (int i = 0; i < summarizers.size(); ++i) {
                 summarizer_grade = (float)Math.min(
                     summarizer_grade,
                     summarizers.get(i).qualify(subject)
+                );
+            }
+
+            if (qualifiers != null) {
+                summarizer_qualifier_grade = (float)Math.min(
+                    summarizer_qualifier_grade,
+                    summarizer_grade
                 );
             }
 
             s1_summarizer_sigma_count += summarizer_grade;
+            s1_summarizer_and_qualifier_sigma_count
+                += summarizer_qualifier_grade;
         }
 
         for (Subject subject : s2) {
             float summarizer_grade = 1.0f;
+            float summarizer_qualifier_grade = 1.0f;
 
             for (int i = 0; i < summarizers.size(); ++i) {
                 summarizer_grade = (float)Math.min(
@@ -74,18 +87,37 @@ public class MultiSubjectSummary {
                 );
             }
 
+            if (qualifiers != null) {
+                summarizer_qualifier_grade = (float)Math.min(
+                    summarizer_qualifier_grade,
+                    summarizer_grade
+                );
+            }
+
             s2_summarizer_sigma_count += summarizer_grade;
+            s2_summarizer_and_qualifier_sigma_count
+                += summarizer_qualifier_grade;
         }
 
         float invM1 = 1 / (float)s1.size();
         float invM2 = 1 / (float)s2.size();
 
-        float quality = quantifier.grade(
-            invM1 * s1_summarizer_sigma_count / (
-                invM1 * s1_summarizer_sigma_count
-                    + invM2 * s2_summarizer_sigma_count
-            )
-        );
+        float quality = 0.0f;
+        if (form == FORM.F1) {
+            quality = quantifier.grade(
+                invM1 * s1_summarizer_sigma_count / (
+                    invM1 * s1_summarizer_sigma_count
+                        + invM2 * s2_summarizer_sigma_count
+                )
+            );
+        } else if (form == FORM.F2) {
+            quality = quantifier.grade(
+                invM1 * s1_summarizer_sigma_count / (
+                    invM1 * s1_summarizer_sigma_count
+                        + invM2 * s2_summarizer_and_qualifier_sigma_count
+                )
+            );
+        }
 
         return quality;
     }
@@ -101,6 +133,41 @@ public class MultiSubjectSummary {
 
         if (form == FORM.F1) {
             sb.append(" compared to " + s2name);
+        } else if (form == FORM.F2) {
+            sb.append(", compared to " + s2name);
+        }
+
+        if (form == FORM.F2) {
+            String preQualifierVerb
+                = qualifiers.getFirst().getPreQualifierVerb();
+            sb.append(" " + preQualifierVerb + " ");
+            for (int i = 0; i < qualifiers.size(); ++i) {
+                if (i == 1 && qualifiers.size() == 2) {
+                    sb.append(" ");
+                }
+                else if (i > 0) {
+                    sb.append(", ");
+                }
+                if (i > 0 && i == qualifiers.size() - 1) {
+                    sb.append("and ");
+                }
+
+                if (i > 0 && qualifiers
+                        .get(i)
+                        .getPreQualifierVerb()
+                        .equals(preQualifierVerb)
+                ) {
+                    preQualifierVerb = qualifiers.get(i).getPreQualifierVerb();
+                    sb.append(preQualifierVerb + " ");
+                }
+
+                sb.append(qualifiers.get(i).getLabel());
+                if (!qualifiers.get(i).getPostLabelStr().isEmpty()) {
+                    sb.append(" " + qualifiers.get(i).getPostLabelStr());
+                }
+            }
+
+            sb.append(",");
         }
 
         String preSummarizerVerb

@@ -3,6 +3,8 @@ package com.example;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.MultiSubjectSummary.FORM;
+
 public class SummaryGenerator {
     private static String SUBJECT_NAME = "people";
 
@@ -131,6 +133,20 @@ public class SummaryGenerator {
                     summaries.add(new Pair<Float, String>(
                         summary.getQuality(subjects),
                         summary.toString(SUBJECT_NAME)
+                    ));
+                    MultiSubjectSummary msSummary = new MultiSubjectSummary(
+                        (RelativeQuantifier)quantifier,
+                        qualifiers,
+                        summarizers,
+                        FORM.F2
+                    );
+                    summaries.add(new Pair<Float, String>(
+                        msSummary.getQuality(males, females),
+                        msSummary.toString("males", "females")
+                    ));
+                    summaries.add(new Pair<Float, String>(
+                        msSummary.getQuality(females, males),
+                        msSummary.toString("females", "males")
                     ));
                 }
             }
