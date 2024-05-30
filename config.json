@@ -255,7 +255,7 @@
         {
             "label": "underweight",
             "feature": "bmi",
-            "mambership": "trapezoidal",
+            "membership": "trapezoidal",
             "params": {
                 "a": 0.0,
                 "b": 0.0,
@@ -290,10 +290,10 @@
             "feature": "bmi",
             "membership": "trapezoidal",
             "params": {
-                "a": 0.0,
-                "b": 0.0,
-                "c": 16.0,
-                "d": 21.0
+                "a": 28.0,
+                "b": 32.0,
+                "c": 90.0,
+                "d": 90.0
             }
         },
         {
@@ -353,7 +353,7 @@
         },
         {
             "label": "normal pressure",
-            "feature": "normal pressure",
+            "feature": "diastolic",
             "membership": "trapezoidal",
             "params": {
                 "a": 50.0,
