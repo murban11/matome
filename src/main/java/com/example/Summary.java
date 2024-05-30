@@ -11,38 +11,46 @@ public class Summary {
     private List<QualifierSummarizer> qualifiers = null;
     private List<QualifierSummarizer> summarizers;
     private float[] qualities = new float[QUALITIES_COUNT];
+    private float[] weights = new float[QUALITIES_COUNT];
     private boolean qualitiesCalculated = false;
+
+    private Summary(
+        List<QualifierSummarizer> summarizers,
+        float[] weights
+    ) {
+        this.summarizers = new ArrayList<>(summarizers);
+        this.weights = weights;
+    }
 
     public Summary(
         RelativeQuantifier quantifier,
-        List<QualifierSummarizer> summarizers
+        List<QualifierSummarizer> summarizers,
+        float[] weights
     ) {
+        this(summarizers, weights);
         this.relativeQuantifier = quantifier;
-        this.summarizers = new ArrayList<>(summarizers);
     }
 
     public Summary(
         AbsoluteQuantifier quantifier,
-        List<QualifierSummarizer> summarizers
+        List<QualifierSummarizer> summarizers,
+        float[] weights
     ) {
+        this(summarizers, weights);
         this.absoluteQuantifier = quantifier;
-        this.summarizers = new ArrayList<>(summarizers);
     }
 
     public Summary(
         RelativeQuantifier quantifier,
         List<QualifierSummarizer> qualifiers,
-        List<QualifierSummarizer> summarizers
+        List<QualifierSummarizer> summarizers,
+        float[] weights
     ) {
-        this(quantifier, summarizers);
+        this(quantifier, summarizers, weights);
         this.qualifiers = new ArrayList<>(qualifiers);
     }
 
-    public float getQuality(int n, List<Subject> subjects) throws Exception {
-        if (n < 0 || n >= QUALITIES_COUNT) {
-            throw new Exception("Invalid index of summary quality");
-        }
-
+    public float getQuality(List<Subject> subjects) throws Exception {
         if (!qualitiesCalculated) {
             int N = subjects.size();
 
@@ -230,7 +238,12 @@ public class Summary {
             qualitiesCalculated = true;
         }
 
-        return qualities[n];
+        float quality = 0.0f;
+        for (int i = 0; i < QUALITIES_COUNT; ++i) {
+            quality += weights[i] * qualities[i];
+        }
+
+        return quality;
     }
 
     public String toString(String subjectsName) {

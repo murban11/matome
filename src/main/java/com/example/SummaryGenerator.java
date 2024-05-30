@@ -34,7 +34,7 @@ public class SummaryGenerator {
         this.subjects = new ArrayList<>(subjects);
     }
 
-    public List<Pair<Float, String>> generate() {
+    public List<Pair<Float, String>> generate() throws Exception {
         List<Pair<Float, String>> summaries = new ArrayList<>();
 
         if (relativeQuantifiers != null) {
@@ -53,25 +53,10 @@ public class SummaryGenerator {
         return summaries;
     }
 
-    private float calcQuality(Summary summary) {
-        float quality = 0.0f;
-
-        for (int i = 0; i < qualityWeights.length; ++i) {
-            try {
-                quality += qualityWeights[i] * summary.getQuality(i, subjects);
-            } catch (Exception e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-
-        return quality;
-    }
-
     private void generate(
         List<Pair<Float, String>> summaries,
         Quantifier<?> quantifier
-    ) {
+    ) throws Exception {
         QualifierSummarizerSubsetGenerator generator
             = new QualifierSummarizerSubsetGenerator(qualifierSummarizers);
 
@@ -82,19 +67,21 @@ public class SummaryGenerator {
             if (quantifier instanceof RelativeQuantifier) {
                 Summary summary = new Summary(
                     (RelativeQuantifier)quantifier,
-                    summarizers
+                    summarizers,
+                    qualityWeights
                 );
                 summaries.add(new Pair<Float, String>(
-                    calcQuality(summary),
+                    summary.getQuality(subjects),
                     summary.toString(SUBJECT_NAME)
                 ));
             } else if (quantifier instanceof AbsoluteQuantifier) {
                 Summary summary = new Summary(
                     (AbsoluteQuantifier)quantifier,
-                    summarizers
+                    summarizers,
+                    qualityWeights
                 );
                 summaries.add(new Pair<Float, String>(
-                    calcQuality(summary),
+                    summary.getQuality(subjects),
                     summary.toString(SUBJECT_NAME)
                 ));
 
@@ -113,10 +100,11 @@ public class SummaryGenerator {
                     Summary summary = new Summary(
                         (RelativeQuantifier)quantifier,
                         qualifiers,
-                        summarizers
+                        summarizers,
+                        qualityWeights
                     );
                     summaries.add(new Pair<Float, String>(
-                        calcQuality(summary),
+                        summary.getQuality(subjects),
                         summary.toString(SUBJECT_NAME)
                     ));
                 }
