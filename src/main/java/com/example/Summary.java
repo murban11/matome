@@ -134,9 +134,13 @@ public class Summary {
                 }
 
                 if (qualifiers != null) {
-                    qualities[0] = relativeQuantifier
-                        .grade(summarizer_and_qualifier_sigma_count
-                            / qualifier_sigma_count);
+                    if (qualifier_sigma_count > 0.0f) {
+                        qualities[0] = relativeQuantifier
+                            .grade(summarizer_and_qualifier_sigma_count
+                                / qualifier_sigma_count);
+                    } else {
+                        qualities[0] = 0.0f;
+                    }
                 } else if (relativeQuantifier != null) {
                     qualities[0] = relativeQuantifier
                         .grade(summarizer_sigma_count / (float)N);
@@ -182,7 +186,11 @@ public class Summary {
                 = (float)Math.pow(in_sj_prod, 1 / (float)summarizers.size());
             qualities[1] = 1 - qualities[1];
 
-            qualities[2] = t / (float)h;
+            if (h > 0.0f) {
+                qualities[2] = t / (float)h;
+            } else {
+                qualities[2] = 0.0f;
+            }
             qualities[3] = Math.abs(in_sj_prod - qualities[2]);
             qualities[4] = 2*(float)Math.pow(
                 0.5f, summarizers.size()
