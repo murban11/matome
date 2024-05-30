@@ -120,7 +120,7 @@ public class QualifierSummarizerSubsetGenerator {
                     int ssj = selectedSummarizers.get(j);
                     if (ssj < classes.get(j).size() - 1) {
                         selectedSummarizers.set(j, ssj + 1);
-                        break;
+                        return;
                     }
                     selectedSummarizers.set(j, -1);
                 }
@@ -147,7 +147,7 @@ public class QualifierSummarizerSubsetGenerator {
                     int qsj = selectedQualifiers.get(j);
                     if (qsj < classes.get(j).size() - 1) {
                         selectedQualifiers.set(j, qsj + 1);
-                        break;
+                        return;
                     }
                     selectedQualifiers.set(j, -1);
                 }
