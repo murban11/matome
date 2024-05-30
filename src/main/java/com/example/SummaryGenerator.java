@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class SummaryGenerator {
+    private static String SUBJECT_NAME = "people";
+
     private List<RelativeQuantifier> relativeQuantifiers = null;
     private List<AbsoluteQuantifier> absoluteQuantifiers = null;
     private List<QualifierSummarizer> qualifierSummarizers;
@@ -84,7 +86,7 @@ public class SummaryGenerator {
                 );
                 summaries.add(new Pair<Float, String>(
                     calcQuality(summary),
-                    summary.toString()
+                    summary.toString(SUBJECT_NAME)
                 ));
             } else if (quantifier instanceof AbsoluteQuantifier) {
                 Summary summary = new Summary(
@@ -93,7 +95,7 @@ public class SummaryGenerator {
                 );
                 summaries.add(new Pair<Float, String>(
                     calcQuality(summary),
-                    summary.toString()
+                    summary.toString(SUBJECT_NAME)
                 ));
 
                 // Do not generate summaries of the second form for absolute
@@ -115,7 +117,7 @@ public class SummaryGenerator {
                     );
                     summaries.add(new Pair<Float, String>(
                         calcQuality(summary),
-                        summary.toString()
+                        summary.toString(SUBJECT_NAME)
                     ));
                 }
             }
