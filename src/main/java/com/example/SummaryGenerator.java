@@ -8,6 +8,11 @@ import com.example.MultiSubjectSummary.FORM;
 public class SummaryGenerator {
     private static String SUBJECT_NAME = "people";
 
+    public static enum SummaryType {
+        SINGLE_SUBJECT,
+        MUTLI_SUBJECT
+    };
+
     private List<RelativeQuantifier> relativeQuantifiers = null;
     private List<AbsoluteQuantifier> absoluteQuantifiers = null;
     private List<QualifierSummarizer> qualifierSummarizers;
@@ -49,17 +54,27 @@ public class SummaryGenerator {
         }
     }
 
-    public List<Pair<Float, String>> generate() throws Exception {
+    public List<Pair<Float, String>> generate(
+        SummaryType type
+    ) throws Exception {
         List<Pair<Float, String>> summaries = new ArrayList<>();
 
-        if (relativeQuantifiers != null) {
-            for (var quantifier : relativeQuantifiers) {
-                generate(summaries, quantifier);
+        if (type == SummaryType.SINGLE_SUBJECT) {
+            if (relativeQuantifiers != null) {
+                for (var quantifier : relativeQuantifiers) {
+                    generateSingleSubjectSummaries(summaries, quantifier);
+                }
             }
-        }
-        if (absoluteQuantifiers != null) {
-            for (var quantifier : absoluteQuantifiers) {
-                generate(summaries, quantifier);
+            if (absoluteQuantifiers != null) {
+                for (var quantifier : absoluteQuantifiers) {
+                    generateSingleSubjectSummaries(summaries, quantifier);
+                }
+            }
+        } else {
+            if (relativeQuantifiers != null) {
+                for (var quantifier : relativeQuantifiers) {
+                    generateMultiSubjectSummaries(summaries, quantifier);
+                }
             }
         }
 
@@ -68,7 +83,7 @@ public class SummaryGenerator {
         return summaries;
     }
 
-    private void generate(
+    private void generateSingleSubjectSummaries(
         List<Pair<Float, String>> summaries,
         Quantifier<?> quantifier
     ) throws Exception {
@@ -88,18 +103,6 @@ public class SummaryGenerator {
                 summaries.add(new Pair<Float, String>(
                     summary.getQuality(subjects),
                     summary.toString(SUBJECT_NAME)
-                ));
-                MultiSubjectSummary msSummary = new MultiSubjectSummary(
-                    (RelativeQuantifier)quantifier,
-                    summarizers
-                );
-                summaries.add(new Pair<Float, String>(
-                    msSummary.getQuality(males, females),
-                    msSummary.toString("males", "females")
-                ));
-                summaries.add(new Pair<Float, String>(
-                    msSummary.getQuality(females, males),
-                    msSummary.toString("females", "males")
                 ));
             } else if (quantifier instanceof AbsoluteQuantifier) {
                 Summary summary = new Summary(
@@ -134,35 +137,67 @@ public class SummaryGenerator {
                         summary.getQuality(subjects),
                         summary.toString(SUBJECT_NAME)
                     ));
-                    MultiSubjectSummary msSummary = new MultiSubjectSummary(
-                        (RelativeQuantifier)quantifier,
-                        qualifiers,
-                        summarizers,
-                        FORM.F2
-                    );
-                    summaries.add(new Pair<Float, String>(
-                        msSummary.getQuality(males, females),
-                        msSummary.toString("males", "females")
-                    ));
-                    summaries.add(new Pair<Float, String>(
-                        msSummary.getQuality(females, males),
-                        msSummary.toString("females", "males")
-                    ));
-                    msSummary = new MultiSubjectSummary(
-                        (RelativeQuantifier)quantifier,
-                        qualifiers,
-                        summarizers,
-                        FORM.F3
-                    );
-                    summaries.add(new Pair<Float, String>(
-                        msSummary.getQuality(males, females),
-                        msSummary.toString("males", "females")
-                    ));
-                    summaries.add(new Pair<Float, String>(
-                        msSummary.getQuality(females, males),
-                        msSummary.toString("females", "males")
-                    ));
                 }
+            }
+        }
+    }
+
+    private void generateMultiSubjectSummaries(
+        List<Pair<Float, String>> summaries,
+        RelativeQuantifier quantifier
+    ) throws Exception {
+        QualifierSummarizerSubsetGenerator generator
+            = new QualifierSummarizerSubsetGenerator(qualifierSummarizers);
+
+        while (generator.hasNextSummarizers()) {
+            List<QualifierSummarizer> summarizers
+                = generator.nextSummarizers();
+
+            MultiSubjectSummary f1summary = new MultiSubjectSummary(
+                quantifier,
+                summarizers
+            );
+            summaries.add(new Pair<Float, String>(
+                f1summary.getQuality(males, females),
+                f1summary.toString("males", "females")
+            ));
+            summaries.add(new Pair<Float, String>(
+                f1summary.getQuality(females, males),
+                f1summary.toString("females", "males")
+            ));
+
+            while (generator.hasNextQualifiers()) {
+                List<QualifierSummarizer> qualifiers
+                    = generator.nextQualifiers();
+
+                MultiSubjectSummary f2summary = new MultiSubjectSummary(
+                    (RelativeQuantifier)quantifier,
+                    qualifiers,
+                    summarizers,
+                    FORM.F2
+                );
+                summaries.add(new Pair<Float, String>(
+                    f2summary.getQuality(males, females),
+                    f2summary.toString("males", "females")
+                ));
+                summaries.add(new Pair<Float, String>(
+                    f2summary.getQuality(females, males),
+                    f2summary.toString("females", "males")
+                ));
+                MultiSubjectSummary f3summary = new MultiSubjectSummary(
+                    (RelativeQuantifier)quantifier,
+                    qualifiers,
+                    summarizers,
+                    FORM.F3
+                );
+                summaries.add(new Pair<Float, String>(
+                    f3summary.getQuality(males, females),
+                    f3summary.toString("males", "females")
+                ));
+                summaries.add(new Pair<Float, String>(
+                    f3summary.getQuality(females, males),
+                    f3summary.toString("females", "males")
+                ));
             }
         }
     }
