@@ -42,48 +42,50 @@ public class MultiSubjectSummary {
     }
     
     public float getQuality(
-        List<Subject> s1, List<Subject> s2
+        List<Subject> subjects1, List<Subject> subjects2
     ) throws Exception {
-        if (form == FORM.F4) {
-            throw new UnsupportedOperationException("Not implemented yet");
-        }
-
         float s1_summarizer_sigma_count = 0.0f;
         float s2_summarizer_sigma_count = 0.0f;
         float s1_summarizer_and_qualifier_sigma_count = 0.0f;
         float s2_summarizer_and_qualifier_sigma_count = 0.0f;
+        float implication_sigma_count = 0.0f;
 
-        for (Subject subject : s1) {
-            float summarizer_grade = 1.0f;
+        for (var s1 : subjects1) {
+            float s1_summarizer_grade = 1.0f;
             float summarizer_qualifier_grade = 1.0f;
 
-            for (int i = 0; i < summarizers.size(); ++i) {
-                summarizer_grade = (float)Math.min(
-                    summarizer_grade,
-                    summarizers.get(i).qualify(subject)
+            for (var summarizer : summarizers) {
+                s1_summarizer_grade = (float)Math.min(
+                    s1_summarizer_grade,
+                    summarizer.qualify(s1)
                 );
             }
 
             if (qualifiers != null) {
                 summarizer_qualifier_grade = (float)Math.min(
                     summarizer_qualifier_grade,
-                    summarizer_grade
+                    s1_summarizer_grade
                 );
             }
 
-            s1_summarizer_sigma_count += summarizer_grade;
+            s1_summarizer_sigma_count += s1_summarizer_grade;
             s1_summarizer_and_qualifier_sigma_count
                 += summarizer_qualifier_grade;
+
+            implication_sigma_count += Math.min(
+                1,
+                1 - s1_summarizer_grade + 0.0
+            );
         }
 
-        for (Subject subject : s2) {
+        for (Subject s2 : subjects2) {
             float summarizer_grade = 1.0f;
             float summarizer_qualifier_grade = 1.0f;
 
             for (int i = 0; i < summarizers.size(); ++i) {
                 summarizer_grade = (float)Math.min(
                     summarizer_grade,
-                    summarizers.get(i).qualify(subject)
+                    summarizers.get(i).qualify(s2)
                 );
             }
 
@@ -97,10 +99,15 @@ public class MultiSubjectSummary {
             s2_summarizer_sigma_count += summarizer_grade;
             s2_summarizer_and_qualifier_sigma_count
                 += summarizer_qualifier_grade;
+
+            implication_sigma_count += Math.min(
+                1,
+                1 - 0.0 + s2_summarizer_sigma_count
+            );
         }
 
-        float invM1 = 1 / (float)s1.size();
-        float invM2 = 1 / (float)s2.size();
+        float invM1 = 1 / (float)subjects1.size();
+        float invM2 = 1 / (float)subjects2.size();
 
         float quality = 0.0f;
         if (form == FORM.F1) {
@@ -124,6 +131,9 @@ public class MultiSubjectSummary {
                         + invM2 * s2_summarizer_sigma_count
                 )
             );
+        } else if (form == FORM.F4) {
+            quality = 1 - (1 / (float)(subjects1.size() + subjects2.size()))
+                * implication_sigma_count;
         }
 
         return quality;

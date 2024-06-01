@@ -72,9 +72,7 @@ public class SummaryGenerator {
             }
         } else {
             if (relativeQuantifiers != null) {
-                for (var quantifier : relativeQuantifiers) {
-                    generateMultiSubjectSummaries(summaries, quantifier);
-                }
+                generateMultiSubjectSummaries(summaries, relativeQuantifiers);
             }
         }
 
@@ -144,7 +142,7 @@ public class SummaryGenerator {
 
     private void generateMultiSubjectSummaries(
         List<Pair<Float, String>> summaries,
-        RelativeQuantifier quantifier
+        List<RelativeQuantifier> quantifiers
     ) throws Exception {
         QualifierSummarizerSubsetGenerator generator
             = new QualifierSummarizerSubsetGenerator(qualifierSummarizers);
@@ -153,51 +151,65 @@ public class SummaryGenerator {
             List<QualifierSummarizer> summarizers
                 = generator.nextSummarizers();
 
-            MultiSubjectSummary f1summary = new MultiSubjectSummary(
-                quantifier,
+            MultiSubjectSummary f4summary = new MultiSubjectSummary(
                 summarizers
             );
             summaries.add(new Pair<Float, String>(
-                f1summary.getQuality(males, females),
-                f1summary.toString("males", "females")
+                f4summary.getQuality(males, females),
+                f4summary.toString("males", "females")
             ));
             summaries.add(new Pair<Float, String>(
-                f1summary.getQuality(females, males),
-                f1summary.toString("females", "males")
+                f4summary.getQuality(females, males),
+                f4summary.toString("females", "males")
             ));
 
-            while (generator.hasNextQualifiers()) {
-                List<QualifierSummarizer> qualifiers
-                    = generator.nextQualifiers();
+            for (var quantifier : quantifiers) {
+                MultiSubjectSummary f1summary = new MultiSubjectSummary(
+                    quantifier,
+                    summarizers
+                );
+                summaries.add(new Pair<Float, String>(
+                    f1summary.getQuality(males, females),
+                    f1summary.toString("males", "females")
+                ));
+                summaries.add(new Pair<Float, String>(
+                    f1summary.getQuality(females, males),
+                    f1summary.toString("females", "males")
+                ));
 
-                MultiSubjectSummary f2summary = new MultiSubjectSummary(
-                    (RelativeQuantifier)quantifier,
-                    qualifiers,
-                    summarizers,
-                    FORM.F2
-                );
-                summaries.add(new Pair<Float, String>(
-                    f2summary.getQuality(males, females),
-                    f2summary.toString("males", "females")
-                ));
-                summaries.add(new Pair<Float, String>(
-                    f2summary.getQuality(females, males),
-                    f2summary.toString("females", "males")
-                ));
-                MultiSubjectSummary f3summary = new MultiSubjectSummary(
-                    (RelativeQuantifier)quantifier,
-                    qualifiers,
-                    summarizers,
-                    FORM.F3
-                );
-                summaries.add(new Pair<Float, String>(
-                    f3summary.getQuality(males, females),
-                    f3summary.toString("males", "females")
-                ));
-                summaries.add(new Pair<Float, String>(
-                    f3summary.getQuality(females, males),
-                    f3summary.toString("females", "males")
-                ));
+                while (generator.hasNextQualifiers()) {
+                    List<QualifierSummarizer> qualifiers
+                        = generator.nextQualifiers();
+
+                    MultiSubjectSummary f2summary = new MultiSubjectSummary(
+                        (RelativeQuantifier)quantifier,
+                        qualifiers,
+                        summarizers,
+                        FORM.F2
+                    );
+                    summaries.add(new Pair<Float, String>(
+                        f2summary.getQuality(males, females),
+                        f2summary.toString("males", "females")
+                    ));
+                    summaries.add(new Pair<Float, String>(
+                        f2summary.getQuality(females, males),
+                        f2summary.toString("females", "males")
+                    ));
+                    MultiSubjectSummary f3summary = new MultiSubjectSummary(
+                        (RelativeQuantifier)quantifier,
+                        qualifiers,
+                        summarizers,
+                        FORM.F3
+                    );
+                    summaries.add(new Pair<Float, String>(
+                        f3summary.getQuality(males, females),
+                        f3summary.toString("males", "females")
+                    ));
+                    summaries.add(new Pair<Float, String>(
+                        f3summary.getQuality(females, males),
+                        f3summary.toString("females", "males")
+                    ));
+                }
             }
         }
     }
