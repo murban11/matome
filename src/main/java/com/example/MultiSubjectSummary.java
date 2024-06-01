@@ -169,7 +169,7 @@ public class MultiSubjectSummary {
                     sb.append("and ");
                 }
 
-                if (i > 0 && qualifiers
+                if (i > 0 && !qualifiers
                         .get(i)
                         .getPreQualifierVerb()
                         .equals(preQualifierVerb)
@@ -205,7 +205,7 @@ public class MultiSubjectSummary {
                 sb.append("and ");
             }
 
-            if (i > 0 && summarizers
+            if (i > 0 && !summarizers
                     .get(i)
                     .getPreSummarizerVerb()
                     .equals(preSummarizerVerb)
