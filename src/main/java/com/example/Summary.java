@@ -200,10 +200,7 @@ public class Summary {
                 qualities[2] = 0.0f;
             }
             qualities[3] = Math.abs(in_sj_prod - qualities[2]);
-            qualities[4] = 2*(float)Math.pow(
-                0.5f, summarizers.size()
-                    + ((qualifiers != null) ? qualifiers.size() : 0)
-            );
+            qualities[4] = 2*(float)Math.pow(0.5f, summarizers.size());
 
             // T6
             if (relativeQuantifier != null) {
