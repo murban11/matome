@@ -111,12 +111,17 @@ public class MultiSubjectSummary {
 
         float quality = 0.0f;
         if (form == FORM.F1) {
-            quality = quantifier.grade(
-                invM1 * s1_summarizer_sigma_count / (
-                    invM1 * s1_summarizer_sigma_count
-                        + invM2 * s2_summarizer_sigma_count
-                )
-            );
+            if (
+                s1_summarizer_sigma_count != 0
+                || s2_summarizer_sigma_count != 0
+            ) {
+                quality = quantifier.grade(
+                    invM1 * s1_summarizer_sigma_count / (
+                        invM1 * s1_summarizer_sigma_count
+                            + invM2 * s2_summarizer_sigma_count
+                    )
+                );
+            }
         } else if (form == FORM.F2) {
             quality = quantifier.grade(
                 invM1 * s1_summarizer_sigma_count / (
