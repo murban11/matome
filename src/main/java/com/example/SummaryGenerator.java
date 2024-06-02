@@ -190,14 +190,16 @@ public class SummaryGenerator {
                         f1summary.toString("females", "males")
                     ));
                 }
+            }
 
-                while (generator.hasNextQualifiers()) {
-                    List<QualifierSummarizer> qualifiers
-                        = generator.nextQualifiers();
+            while (generator.hasNextQualifiers()) {
+                List<QualifierSummarizer> qualifiers
+                    = generator.nextQualifiers();
 
+                for (var quantifier : quantifiers) {
                     if ((type & SummaryType.MS2.id) > 0) {
                         MultiSubjectSummary f2summary = new MultiSubjectSummary(
-                            (RelativeQuantifier)quantifier,
+                            quantifier,
                             qualifiers,
                             summarizers,
                             FORM.F2
@@ -213,7 +215,7 @@ public class SummaryGenerator {
                     }
                     if ((type & SummaryType.MS3.id) > 0) {
                         MultiSubjectSummary f3summary = new MultiSubjectSummary(
-                            (RelativeQuantifier)quantifier,
+                            quantifier,
                             qualifiers,
                             summarizers,
                             FORM.F3
