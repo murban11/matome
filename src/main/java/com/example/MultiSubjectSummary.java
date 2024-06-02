@@ -52,6 +52,7 @@ public class MultiSubjectSummary {
 
         for (var s1 : subjects1) {
             float s1_summarizer_grade = 1.0f;
+            float s1_qualifier_grade = 1.0f;
             float summarizer_qualifier_grade = 1.0f;
 
             for (var summarizer : summarizers) {
@@ -62,9 +63,16 @@ public class MultiSubjectSummary {
             }
 
             if (qualifiers != null) {
+                for (var qualifier : qualifiers) {
+                    s1_qualifier_grade = (float)Math.min(
+                        s1_qualifier_grade,
+                        qualifier.qualify(s1)
+                    );
+                }
+
                 summarizer_qualifier_grade = (float)Math.min(
-                    summarizer_qualifier_grade,
-                    s1_summarizer_grade
+                    s1_summarizer_grade,
+                    s1_qualifier_grade
                 );
             }
 
@@ -79,24 +87,32 @@ public class MultiSubjectSummary {
         }
 
         for (Subject s2 : subjects2) {
-            float summarizer_grade = 1.0f;
+            float s2_summarizer_grade = 1.0f;
+            float s2_qualifier_grade = 1.0f;
             float summarizer_qualifier_grade = 1.0f;
 
             for (int i = 0; i < summarizers.size(); ++i) {
-                summarizer_grade = (float)Math.min(
-                    summarizer_grade,
+                s2_summarizer_grade = (float)Math.min(
+                    s2_summarizer_grade,
                     summarizers.get(i).qualify(s2)
                 );
             }
 
             if (qualifiers != null) {
+                for (var qualifier : qualifiers) {
+                    s2_qualifier_grade = (float)Math.min(
+                        s2_qualifier_grade,
+                        qualifier.qualify(s2)
+                    );
+                }
+
                 summarizer_qualifier_grade = (float)Math.min(
-                    summarizer_qualifier_grade,
-                    summarizer_grade
+                    s2_summarizer_grade,
+                    s2_qualifier_grade
                 );
             }
 
-            s2_summarizer_sigma_count += summarizer_grade;
+            s2_summarizer_sigma_count += s2_summarizer_grade;
             s2_summarizer_and_qualifier_sigma_count
                 += summarizer_qualifier_grade;
 
@@ -123,19 +139,29 @@ public class MultiSubjectSummary {
                 );
             }
         } else if (form == FORM.F2) {
-            quality = quantifier.grade(
-                invM1 * s1_summarizer_sigma_count / (
-                    invM1 * s1_summarizer_sigma_count
-                        + invM2 * s2_summarizer_and_qualifier_sigma_count
-                )
-            );
+            if (
+                s1_summarizer_sigma_count != 0
+                || s2_summarizer_and_qualifier_sigma_count != 0
+            ) {
+                quality = quantifier.grade(
+                    invM1 * s1_summarizer_sigma_count / (
+                        invM1 * s1_summarizer_sigma_count
+                            + invM2 * s2_summarizer_and_qualifier_sigma_count
+                    )
+                );
+            }
         } else if (form == FORM.F3) {
-            quality = quantifier.grade(
-                invM1 * s1_summarizer_and_qualifier_sigma_count / (
-                    invM1 * s1_summarizer_and_qualifier_sigma_count
-                        + invM2 * s2_summarizer_sigma_count
-                )
-            );
+            if (
+                s1_summarizer_and_qualifier_sigma_count != 0
+                || s2_summarizer_sigma_count != 0
+            ) {
+                quality = quantifier.grade(
+                    invM1 * s1_summarizer_and_qualifier_sigma_count / (
+                        invM1 * s1_summarizer_and_qualifier_sigma_count
+                            + invM2 * s2_summarizer_sigma_count
+                    )
+                );
+            }
         } else if (form == FORM.F4) {
             quality = 1 - (1 / (float)(subjects1.size() + subjects2.size()))
                 * implication_sigma_count;
