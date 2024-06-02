@@ -10,7 +10,6 @@ import com.fasterxml.jackson.core.exc.StreamWriteException;
 import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.databind.type.CollectionLikeType;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -20,10 +19,10 @@ import lombok.NoArgsConstructor;
 public class Config {
 
     @JsonProperty(value = "relativeQuantifiers")
-    public List<Quantifier<Float>> relativeQuantifiers;
+    public List<RelativeQuantifier> relativeQuantifiers;
 
     @JsonProperty(value = "absoluteQuantifiers")
-    public List<Quantifier<Integer>> absoluteQuantifiers;
+    public List<AbsoluteQuantifier> absoluteQuantifiers;
 
     @JsonProperty(value = "qualifiers")
     public List<QualifierSummarizer> qualifierSummarizers;
@@ -47,22 +46,17 @@ public class Config {
         ObjectMapper mapper = new ObjectMapper();
         SimpleModule module = new SimpleModule();
 
-        CollectionLikeType relativeQuantifierType = mapper
-            .getTypeFactory()
-            .constructCollectionLikeType(Quantifier.class, Float.class);
-        CollectionLikeType absoluteQuantifierType = mapper
-            .getTypeFactory()
-            .constructCollectionLikeType(Quantifier.class, Integer.class);
-
         module.addSerializer(
             QualifierSummarizer.class,
             new QualifierSummarizerSerializer()
         );
         module.addSerializer(
-            new QuantifierSerializer<>(relativeQuantifierType)
+            RelativeQuantifier.class,
+            new RelativeQuantifierSerializer()
         );
         module.addSerializer(
-            new QuantifierSerializer<>(absoluteQuantifierType)
+            AbsoluteQuantifier.class,
+            new AbsoluteQuantifierSerializer()
         );
 
         module.addDeserializer(
@@ -70,12 +64,12 @@ public class Config {
             new QualifierSummarizerDeserializer()
         );
         module.addDeserializer(
-            Quantifier.class,
-            new QuantifierDeserializer<Quantifier<Integer>>(subjectCount)
+            AbsoluteQuantifier.class,
+            new AbsoluteQuantifierDeserializer(subjectCount)
         );
         module.addDeserializer(
-            Quantifier.class,
-            new QuantifierDeserializer<Quantifier<Float>>(subjectCount)
+            RelativeQuantifier.class,
+            new RelativeQuantifierDeserializer()
         );
 
         mapper.registerModule(module);

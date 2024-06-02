@@ -6,23 +6,22 @@ import com.example.FuzzyLogic.GaussianMembership;
 import com.example.FuzzyLogic.Membership;
 import com.example.FuzzyLogic.TrapezoidalMembership;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
-public class QuantifierSerializer<T> extends StdSerializer<Quantifier<T>> {
+public class AbsoluteQuantifierSerializer extends StdSerializer<AbsoluteQuantifier> {
 
-    public QuantifierSerializer() {
+    public AbsoluteQuantifierSerializer() {
         this(null);
     }
 
-    public QuantifierSerializer(JavaType type) {
-        super(type);
+    public AbsoluteQuantifierSerializer(Class<AbsoluteQuantifier> c) {
+        super(c);
     }
 
     @Override
     public void serialize(
-        Quantifier<T> quantifier,
+        AbsoluteQuantifier quantifier,
         JsonGenerator generator,
         SerializerProvider serializer
     ) throws IOException {
@@ -30,13 +29,7 @@ public class QuantifierSerializer<T> extends StdSerializer<Quantifier<T>> {
 
         generator.writeStringField("label", quantifier.getLabel());
 
-        if (quantifier instanceof RelativeQuantifier) {
-            generator.writeStringField("type", "relative");
-        } else if (quantifier instanceof AbsoluteQuantifier) {
-            generator.writeStringField("type", "absolute");
-        }
-
-        Membership<T> membership = quantifier.getMembership();
+        Membership<Integer> membership = quantifier.getMembership();
         if (membership instanceof TrapezoidalMembership) {
             generator.writeStringField("membership", "trapezoidal");
         } else if (membership instanceof GaussianMembership) {
@@ -49,4 +42,5 @@ public class QuantifierSerializer<T> extends StdSerializer<Quantifier<T>> {
 
         generator.writeEndObject();
     }
+    
 }

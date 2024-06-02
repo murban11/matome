@@ -2,7 +2,6 @@ package com.example;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
@@ -100,23 +99,9 @@ public class Main {
                 0.04f, 0.04f, 0.04f, 0.04f, 0.04f
             };
 
-            List<RelativeQuantifier> relativeQuantifiers = new ArrayList<>();
-            if (config.relativeQuantifiers != null) {
-                for (var rq : config.relativeQuantifiers) {
-                    relativeQuantifiers.add((RelativeQuantifier)rq);
-                }
-            }
-
-            List<AbsoluteQuantifier> absoluteQuantifiers = new ArrayList<>();
-            if (config.absoluteQuantifiers != null) {
-                for (var aq : config.absoluteQuantifiers) {
-                    absoluteQuantifiers.add((AbsoluteQuantifier)aq);
-                }
-            }
-
             SummaryGenerator generator = new SummaryGenerator(
-                relativeQuantifiers,
-                absoluteQuantifiers,
+                config.relativeQuantifiers,
+                config.absoluteQuantifiers,
                 config.qualifierSummarizers,
                 weights,
                 subjects
