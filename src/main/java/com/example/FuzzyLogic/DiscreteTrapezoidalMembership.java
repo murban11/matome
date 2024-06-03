@@ -28,11 +28,11 @@ public class DiscreteTrapezoidalMembership
     @Override
     public float grade(Integer x) {
         if (x >= a && x < b) {
-            return (x - a) / (b - a);
+            return (x - a) / (float)(b - a);
         } else if (x >= b && x < c) {
             return 1;
         } else if (x >= c && x < d) {
-            return (d - x) / (d - c);
+            return (d - x) / (float)(d - c);
         } else {
             return 0;
         }
