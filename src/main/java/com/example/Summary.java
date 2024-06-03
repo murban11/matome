@@ -170,7 +170,7 @@ public class Summary {
                     assert(false);
                 }
 
-                if (quantifier_grade > 0.0) {
+                if (quantifier_grade > 0.0f) {
                     quantifier_support_count += 1;
                 }
                 quantifier_cardinality += quantifier_grade;
@@ -188,7 +188,7 @@ public class Summary {
                 in_sj_prod
                     *= summarizer_support_counts[i] / (float)N;
                 sj_card_prod
-                    *= summarizer_cardinalities[0] / (float)N;
+                    *= summarizer_cardinalities[i] / (float)N;
             }
             qualities[1]
                 = (float)Math.pow(in_sj_prod, 1 / (float)summarizers.size());
@@ -201,18 +201,7 @@ public class Summary {
             }
             qualities[3] = Math.abs(in_sj_prod - qualities[2]);
             qualities[4] = 2*(float)Math.pow(0.5f, summarizers.size());
-
-            // T6
-            if (relativeQuantifier != null) {
-                qualities[5]
-                    = 1 - quantifier_support_count / (float)N;
-            } else if (absoluteQuantifier != null) {
-                qualities[5]
-                    = quantifier_support_count / (float)N;
-            } else {
-                assert(false);
-            }
-
+            qualities[5] = quantifier_support_count / (float)N;
             qualities[6] = 1 - quantifier_cardinality / (float)N;
             qualities[7] = 1 - (float)Math.pow(
                 sj_card_prod, 1 / (float)summarizers.size()
@@ -229,7 +218,7 @@ public class Summary {
             if (qualifiers != null) {
                 qualities[10] = 2*(float)Math.pow(0.5f, qualifiers.size());
             } else {
-                qualities[10] = 0;
+                qualities[10] = 1;
             }
 
             qualitiesCalculated = true;
