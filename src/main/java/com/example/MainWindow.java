@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.example.SummaryGenerator.SummaryType;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
 
@@ -15,6 +16,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -32,8 +34,8 @@ public class MainWindow extends Application {
 
     private final String fontName = "Arial";
     private final int fontSize = 32;
+    private final int smallFontSize = 20;
     private final int choiceBoxPrefWidth = 320;
-    private final int choiceBoxItemFontSize = 20;
 
     private List<RelativeQuantifier> relativeQuantifiers;
     private List<AbsoluteQuantifier> absoluteQuantifiers;
@@ -49,6 +51,9 @@ public class MainWindow extends Application {
     private List<ChoiceBox<String>> featuresCBes = new ArrayList<>();
     private ScrollPane summariesSP = new ScrollPane();
     private VBox summariesVB = new VBox();
+    private CheckBox multiSubjectToggle = new CheckBox(
+        "Enable mutlti-subject summaries"
+    );
 
     private int selectionItemsCount = 3;
 
@@ -78,7 +83,7 @@ public class MainWindow extends Application {
             nQuantitiesL.setFont(new Font(fontName, fontSize));
             ChoiceBox<String> quantitiesCB = new ChoiceBox<>();
             quantitiesCB
-                .setStyle("-fx-font-size: " + choiceBoxItemFontSize + "px;");
+                .setStyle("-fx-font-size: " + smallFontSize + "px;");
             for (var quantifier : relativeQuantifiers) {
                 quantitiesCB.getItems().add(quantifier.getLabel());
             }
@@ -150,7 +155,7 @@ public class MainWindow extends Application {
             nFeaturesL.setFont(new Font(fontName, fontSize));
             ChoiceBox<String> featuresCB = new ChoiceBox<>();
             featuresCB
-                .setStyle("-fx-font-size: " + choiceBoxItemFontSize + "px;");
+                .setStyle("-fx-font-size: " + smallFontSize + "px;");
             featuresCB.setPrefWidth(choiceBoxPrefWidth);
             for (var feature : features) {
                 featuresCB.getItems().add(feature.name);
@@ -212,6 +217,9 @@ public class MainWindow extends Application {
                 spacerRight
             );
 
+        multiSubjectToggle.selectedProperty().setValue(false);
+        multiSubjectToggle.setFont(new Font(fontName, smallFontSize));
+
         Button generateBtn = new Button("Generate");
         generateBtn.setFont(new Font(fontName, fontSize));
         generateBtn.setOnAction(event -> {
@@ -233,6 +241,13 @@ public class MainWindow extends Application {
                 );
 
                 short type = (short)0b0000000000111111;
+                if (!multiSubjectToggle.isSelected()) {
+                    type ^= SummaryType.MS1.id;
+                    type ^= SummaryType.MS2.id;
+                    type ^= SummaryType.MS3.id;
+                    type ^= SummaryType.MS4.id;
+                }
+
                 List<Pair<Float, String>> summaries
                     = generator.generate(type);
 
@@ -260,6 +275,7 @@ public class MainWindow extends Application {
         vbox.getChildren()
             .addAll(
                 quantitiesAndFeautersHB,
+                multiSubjectToggle,
                 generateBtn,
                 summariesSP
             );
