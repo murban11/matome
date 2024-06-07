@@ -253,7 +253,11 @@ public class MainWindow extends Application {
 
                 summariesVB.getChildren().clear();
                 for (var summary : summaries) {
-                    Label summaryL = new Label(summary.second);
+                    Label summaryL = new Label(
+                        summary.second + " ["
+                            + String.format("%.2f", summary.first)
+                            + "]"
+                    );
                     summaryL.setFont(new Font(fontName, fontSize));
                     summariesVB.getChildren().add(summaryL);
                 }
