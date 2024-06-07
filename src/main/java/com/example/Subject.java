@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -78,5 +79,15 @@ public class Subject {
         }
 
         return subjects;
+    }
+
+    public static List<Subject> filterByGender(
+        List<Subject> subjects,
+        Gender gender
+    ) {
+        return subjects
+            .stream()
+            .filter(s -> s.getGender().equals(gender))
+            .collect(Collectors.toList());
     }
 }

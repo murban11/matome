@@ -11,6 +11,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
+import com.example.Subject.Gender;
 import com.example.SummaryGenerator.SummaryType;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
@@ -48,6 +49,18 @@ public class Main {
                 + "By default all possible summary types are generated")
             .build();
         options.addOption(includeSummaryTypeOption);
+
+        Option onlyMalesOption = Option.builder("m")
+            .longOpt("only-males")
+            .desc("Consider only males in single-subject summaries")
+            .build();
+        options.addOption(onlyMalesOption);
+
+        Option onlyFemalesOption = Option.builder("f")
+            .longOpt("only-females")
+            .desc("Consider only females in single-subject summaries")
+            .build();
+        options.addOption(onlyFemalesOption);
 
         Option help = Option.builder("h")
             .longOpt("help")
@@ -99,12 +112,22 @@ public class Main {
                 0.04f, 0.04f, 0.04f, 0.04f, 0.04f
             };
 
+            String subjectName = "people";
+            if (cmd.hasOption("m")) {
+                subjects = Subject.filterByGender(subjects, Gender.MALE);
+                subjectName = "males";
+            } else if (cmd.hasOption("f")) {
+                subjects = Subject.filterByGender(subjects, Gender.FEMALE);
+                subjectName = "females";
+            }
+
             SummaryGenerator generator = new SummaryGenerator(
                 config.relativeQuantifiers,
                 config.absoluteQuantifiers,
                 config.qualifierSummarizers,
                 weights,
-                subjects
+                subjects,
+                subjectName
             );
 
             List<Pair<Float, String>> summaries

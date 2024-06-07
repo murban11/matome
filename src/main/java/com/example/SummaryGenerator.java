@@ -6,8 +6,6 @@ import java.util.List;
 import com.example.MultiSubjectSummary.FORM;
 
 public class SummaryGenerator {
-    private static String SUBJECT_NAME = "people";
-
     public static enum SummaryType {
         SS1((short)0b0000000000000001),
         SS2((short)0b0000000000000010),
@@ -28,6 +26,7 @@ public class SummaryGenerator {
     private List<QualifierSummarizer> qualifierSummarizers;
     private float[] qualityWeights;
     private List<Subject> subjects;
+    private String subjectName;
 
     private List<Subject> males;
     private List<Subject> females;
@@ -37,7 +36,8 @@ public class SummaryGenerator {
         List<AbsoluteQuantifier> absoluteQuantifiers,
         List<QualifierSummarizer> qualifierSummarizers,
         float[] qualityWeights,
-        List<Subject> subjects
+        List<Subject> subjects,
+        String subjectName
     ) throws Exception {
         if (relativeQuantifiers != null) {
             this.relativeQuantifiers = new ArrayList<>(relativeQuantifiers);
@@ -52,6 +52,7 @@ public class SummaryGenerator {
         }
         this.qualityWeights = qualityWeights.clone();
         this.subjects = new ArrayList<>(subjects);
+        this.subjectName = subjectName;
 
         this.males = new ArrayList<>();
         this.females = new ArrayList<>();
@@ -109,7 +110,7 @@ public class SummaryGenerator {
                     );
                     summaries.add(new Pair<Float, String>(
                         summary.getQuality(subjects),
-                        summary.toString(SUBJECT_NAME)
+                        summary.toString(subjectName)
                     ));
                 } else if (quantifier instanceof AbsoluteQuantifier) {
                     Summary summary = new Summary(
@@ -119,7 +120,7 @@ public class SummaryGenerator {
                     );
                     summaries.add(new Pair<Float, String>(
                         summary.getQuality(subjects),
-                        summary.toString(SUBJECT_NAME)
+                        summary.toString(subjectName)
                     ));
                 } else {
                     assert(false);
@@ -141,7 +142,7 @@ public class SummaryGenerator {
                         );
                         summaries.add(new Pair<Float, String>(
                             summary.getQuality(subjects),
-                            summary.toString(SUBJECT_NAME)
+                            summary.toString(subjectName)
                         ));
                     }
                 }

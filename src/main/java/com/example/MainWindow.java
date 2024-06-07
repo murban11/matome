@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.example.Subject.Gender;
 import com.example.SummaryGenerator.SummaryType;
 import com.fasterxml.jackson.core.exc.StreamReadException;
 import com.fasterxml.jackson.databind.DatabindException;
@@ -19,7 +20,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -46,6 +49,7 @@ public class MainWindow extends Application {
     private List<RelativeQuantifier> selectedRelativeQuantifiers;
     private List<AbsoluteQuantifier> selectedAbsoluteQuantifiers;
     private List<Feature> selectedFeatures;
+    private Gender selectedGender = null; // null means both
 
     private List<ChoiceBox<String>> quantitiesCBes = new ArrayList<>();
     private List<ChoiceBox<String>> featuresCBes = new ArrayList<>();
@@ -54,6 +58,9 @@ public class MainWindow extends Application {
     private CheckBox multiSubjectToggle = new CheckBox(
         "Enable mutlti-subject summaries"
     );
+    private RadioButton onlyMalesRB = new RadioButton("Only males");
+    private RadioButton onlyFemalsRB = new RadioButton("Only females");
+    private RadioButton bothGendersRB = new RadioButton("Both genders");
 
     private int selectionItemsCount = 3;
 
@@ -197,24 +204,80 @@ public class MainWindow extends Application {
             featuresVB.getChildren().add(nfeaturesHB);
         }
 
-        Region spacerLeft = new Region();
-        Region spacerMiddle = new Region();
-        Region spacerRight = new Region();
+        Label subjectSelectL = new Label("Subjects:");
+        subjectSelectL.setFont(new Font(fontName, fontSize));
 
-        HBox.setHgrow(spacerLeft, Priority.ALWAYS);
-        HBox.setHgrow(spacerMiddle, Priority.ALWAYS);
-        HBox.setHgrow(spacerRight, Priority.ALWAYS);
+        VBox subjectSelectVB = new VBox(16);
+        subjectSelectVB.setAlignment(Pos.CENTER_LEFT);
+        subjectSelectVB.getChildren().add(subjectSelectL);
+
+        ToggleGroup subjectSelectTG = new ToggleGroup();
+
+        onlyMalesRB = new RadioButton("Only males");
+        onlyMalesRB.setFont(new Font(fontName, smallFontSize));
+        onlyMalesRB.setToggleGroup(subjectSelectTG);
+        onlyMalesRB
+            .selectedProperty()
+            .addListener((observable, oldValue, newValue) -> {
+                if (newValue) {
+                    selectedGender = Gender.MALE;
+                    multiSubjectToggle.setDisable(true);
+                    multiSubjectToggle.selectedProperty().setValue(false);
+                }
+        });
+
+        onlyFemalsRB = new RadioButton("Only females");
+        onlyFemalsRB.setToggleGroup(subjectSelectTG);
+        onlyFemalsRB.setFont(new Font(fontName, smallFontSize));
+        onlyFemalsRB
+            .selectedProperty()
+            .addListener((observable, oldValue, newValue) -> {
+                if (newValue) {
+                    selectedGender = Gender.FEMALE;
+                    multiSubjectToggle.setDisable(true);
+                    multiSubjectToggle.selectedProperty().setValue(false);
+                }
+        });
+
+        bothGendersRB = new RadioButton("Both genders");
+        bothGendersRB.setToggleGroup(subjectSelectTG);
+        bothGendersRB.setSelected(true);
+        bothGendersRB.setFont(new Font(fontName, smallFontSize));
+        bothGendersRB
+            .selectedProperty()
+            .addListener((observable, oldValue, newValue) -> {
+                if (newValue) {
+                    selectedGender = null;
+                    multiSubjectToggle.setDisable(false);
+                }
+        });
+
+        subjectSelectVB
+            .getChildren()
+            .addAll(onlyMalesRB, onlyFemalsRB, bothGendersRB);
+
+        Region firstSpacer = new Region();
+        Region secondSpacer = new Region();
+        Region thirdSpacer = new Region();
+        Region fourthSpacer = new Region();
+
+        HBox.setHgrow(firstSpacer, Priority.ALWAYS);
+        HBox.setHgrow(secondSpacer, Priority.ALWAYS);
+        HBox.setHgrow(thirdSpacer, Priority.ALWAYS);
+        HBox.setHgrow(fourthSpacer, Priority.ALWAYS);
 
         HBox quantitiesAndFeautersHB = new HBox();
         quantitiesAndFeautersHB.setAlignment(Pos.CENTER);
         quantitiesAndFeautersHB
             .getChildren()
             .addAll(
-                spacerLeft,
+                firstSpacer,
                 quantitiesVB,
-                spacerMiddle,
+                secondSpacer,
                 featuresVB,
-                spacerRight
+                thirdSpacer,
+                subjectSelectVB,
+                fourthSpacer
             );
 
         multiSubjectToggle.selectedProperty().setValue(false);
@@ -232,12 +295,32 @@ public class MainWindow extends Application {
             }
 
             try {
+                String subjectName = "people";
+                List<Subject> filteredSubjects = subjects;
+
+                if (
+                    selectedGender != null
+                    && selectedGender.equals(Gender.MALE)
+                ) {
+                    subjectName = "males";
+                    filteredSubjects
+                        = Subject.filterByGender(subjects, Gender.MALE);
+                } else if (
+                    selectedGender != null
+                    && selectedGender.equals(Gender.FEMALE)
+                ) {
+                    subjectName = "females";
+                    filteredSubjects
+                        = Subject.filterByGender(subjects, Gender.FEMALE);
+                }
+
                 SummaryGenerator generator = new SummaryGenerator(
                     selectedRelativeQuantifiers,
                     selectedAbsoluteQuantifiers,
                     selectedQualifierSummarizers,
                     weights,
-                    subjects
+                    filteredSubjects,
+                    subjectName
                 );
 
                 short type = (short)0b0000000000111111;
