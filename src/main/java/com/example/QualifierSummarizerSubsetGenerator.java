@@ -32,7 +32,7 @@ public class QualifierSummarizerSubsetGenerator {
         for (QualifierSummarizer qs : qualifiersSummarizers) {
             boolean classFound = false;
             for (var c : classes) {
-                if (qs.getPostLabelStr().equals(c.get(0).getPostLabelStr())) {
+                if (qs.getFeature().equals(c.get(0).getFeature())) {
                     c.add(qs);
                     classFound = true;
                     break;
