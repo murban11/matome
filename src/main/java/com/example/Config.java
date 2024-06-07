@@ -27,6 +27,9 @@ public class Config {
     @JsonProperty(value = "qualifiers")
     public List<QualifierSummarizer> qualifierSummarizers;
 
+    @JsonProperty(value = "weights")
+    public float[] weights;
+
     public void save(
         String filename
     ) throws StreamWriteException, DatabindException, IOException {

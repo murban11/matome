@@ -118,6 +118,12 @@ public class Main {
                 0.04f, 0.04f, 0.04f, 0.04f, 0.04f
             };
 
+            if (config.weights != null) {
+                for (int i = 0; i < config.weights.length && i < weights.length; ++i) {
+                    weights[i] = config.weights[i];
+                }
+            }
+
             String subjectName = "people";
             if (cmd.hasOption("m")) {
                 subjects = Subject.filterByGender(subjects, Gender.MALE);

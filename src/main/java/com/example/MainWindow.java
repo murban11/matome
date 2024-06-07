@@ -392,6 +392,12 @@ public class MainWindow extends Application {
         subjects = Subject.loadFromFile(datasetFile);
         Config config = Config.load(configFile, subjects.size());
 
+        if (config.weights != null) {
+            for (int i = 0; i < config.weights.length && i < weights.length; ++i) {
+                weights[i] = config.weights[i];
+            }
+        }
+
         relativeQuantifiers = config.relativeQuantifiers;
         absoluteQuantifiers = config.absoluteQuantifiers;
         qualifierSummarizers = config.qualifierSummarizers;
