@@ -54,6 +54,7 @@ public class MainWindow extends Application {
 
     private List<ChoiceBox<String>> quantitiesCBes = new ArrayList<>();
     private List<ChoiceBox<String>> featuresCBes = new ArrayList<>();
+    private List<ChoiceBox<String>> qualifiersCBes = new ArrayList<>();
     private ScrollPane summariesSP = new ScrollPane();
     private VBox summariesVB = new VBox();
     private CheckBox multiSubjectToggle = new CheckBox(
@@ -168,6 +169,8 @@ public class MainWindow extends Application {
             for (var feature : features) {
                 featuresCB.getItems().add(feature.name);
             }
+
+            final int idx = n;
             featuresCB
                 .getSelectionModel()
                 .selectedItemProperty()
@@ -194,6 +197,19 @@ public class MainWindow extends Application {
                         }
 
                         updateFeaturesCBes();
+
+                        if (newFeature != null) {
+                            qualifiersCBes.get(idx).getItems().clear();
+                            for (var qs : qualifierSummarizers) {
+                                if (qs.getFeature().equals(newFeature)) {
+                                    qualifiersCBes
+                                        .get(idx)
+                                        .getItems()
+                                        .add(qs.getLabel());
+                                }
+                            }
+                            qualifiersCBes.get(idx).setDisable(false);
+                        }
                     }
                 });
             featuresCBes.add(featuresCB);
@@ -203,6 +219,30 @@ public class MainWindow extends Application {
                 .getChildren()
                 .addAll(nFeaturesL, featuresCB);
             featuresVB.getChildren().add(nfeaturesHB);
+        }
+
+        Label qualifiersL = new Label("Criteria:");
+        qualifiersL.setFont(new Font(fontName, fontSize));
+
+        VBox qualifiersVB = new VBox();
+        qualifiersVB.setAlignment(Pos.CENTER);
+        qualifiersVB.getChildren().add(qualifiersL);
+
+        for (int i = 0; i < selectionItemsCount; ++i) {
+            ChoiceBox<String> qualifiersCB = new ChoiceBox<>();
+            qualifiersCB
+                .setStyle("-fx-font-size: " + smallFontSize + "px;");
+            qualifiersCB.setPrefWidth(choiceBoxPrefWidth);
+            qualifiersCB.setDisable(true);
+
+            qualifiersCBes.add(qualifiersCB);
+
+            HBox nQualifiersHB = new HBox();
+            nQualifiersHB.setAlignment(Pos.CENTER);
+            nQualifiersHB
+                .getChildren()
+                .add(qualifiersCB);
+            qualifiersVB.getChildren().add(nQualifiersHB);
         }
 
         Label subjectSelectL = new Label("Subjects:");
@@ -276,6 +316,7 @@ public class MainWindow extends Application {
                 quantitiesVB,
                 secondSpacer,
                 featuresVB,
+                qualifiersVB,
                 thirdSpacer,
                 subjectSelectVB,
                 fourthSpacer
@@ -289,9 +330,28 @@ public class MainWindow extends Application {
         generateBtn.setOnAction(event -> {
             List<QualifierSummarizer> selectedQualifierSummarizers
                 = new ArrayList<>();
-            for (QualifierSummarizer qs : qualifierSummarizers) {
-                if (selectedFeatures.contains(qs.getFeature())) {
-                    selectedQualifierSummarizers.add(qs);
+            for (int i = 0; i < featuresCBes.size(); ++i) {
+                Feature feature
+                    = featureFromString(featuresCBes.get(i).getValue());
+                if (feature == null) {
+                    continue;
+                }
+
+                if (qualifiersCBes.get(i).getValue() == null) {
+                    for (var qs : qualifierSummarizers) {
+                        if (qs.getFeature().equals(feature)) {
+                            selectedQualifierSummarizers.add(qs);
+                        }
+                    }
+                } else {
+                    for (var qs : qualifierSummarizers) {
+                        if (
+                            qs.getFeature().equals(feature)
+                            && qs.getLabel().equals(qualifiersCBes.get(i).getValue())
+                        ) {
+                            selectedQualifierSummarizers.add(qs);
+                        }
+                    }
                 }
             }
 
