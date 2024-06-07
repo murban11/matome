@@ -1,6 +1,7 @@
 package com.example;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Summary {
@@ -230,6 +231,27 @@ public class Summary {
         }
 
         return quality;
+    }
+
+    public float getQuality(int n, List<Subject> subjects) throws Exception {
+        if (qualitiesCalculated == false) {
+            getQuality(subjects);
+        }
+
+        return qualities[n];
+    }
+
+    public List<Float> getQualities(List<Subject> subjects) throws Exception {
+        if (qualitiesCalculated == false) {
+            getQuality(subjects);
+        }
+
+        List<Float> qualityList = new ArrayList<>(qualities.length);
+        for (var q : qualities) {
+            qualityList.add(q);
+        }
+
+        return qualityList;
     }
 
     public String toString(String subjectsName) {

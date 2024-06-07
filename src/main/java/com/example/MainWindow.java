@@ -23,6 +23,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -331,18 +332,32 @@ public class MainWindow extends Application {
                     type ^= SummaryType.MS4.id;
                 }
 
-                List<Pair<Float, String>> summaries
+                List<Pair<List<Float>, String>> summaries
                     = generator.generate(type);
 
                 summariesVB.getChildren().clear();
                 for (var summary : summaries) {
+                    float quality = QualityAggregator
+                        .calculate(summary.first, weights);
                     Label summaryL = new Label(
                         summary.second + " ["
-                            + String.format("%.2f", summary.first)
+                            + String.format("%.2f", quality)
                             + "]"
                     );
                     summaryL.setFont(new Font(fontName, fontSize));
                     summariesVB.getChildren().add(summaryL);
+
+                    StringBuilder sb = new StringBuilder();
+                    for (int i = 0; i < summary.first.size(); ++i) {
+                        if (i != 0) sb.append(", ");
+                        sb.append(
+                            "T" + (i + 1) + " = "
+                                + String.format("%.2f", summary.first.get(i))
+                        );
+                    }
+
+					Tooltip summaryTT = new Tooltip(sb.toString());
+                    Tooltip.install(summaryL, summaryTT);
                 }
 
             } catch (Exception e) {

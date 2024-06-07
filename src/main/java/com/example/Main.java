@@ -62,6 +62,12 @@ public class Main {
             .build();
         options.addOption(onlyFemalesOption);
 
+        Option showAllQualitiesOption = Option.builder("a")
+            .longOpt("show-all-qualities")
+            .desc("Show all qualities from T1 to T11 for single-subject summaries")
+            .build();
+        options.addOption(showAllQualitiesOption);
+
         Option help = Option.builder("h")
             .longOpt("help")
             .desc("Display help and exit")
@@ -130,11 +136,28 @@ public class Main {
                 subjectName
             );
 
-            List<Pair<Float, String>> summaries
+            List<Pair<List<Float>, String>> summaries
                 = generator.generate(type);
 
             for (var summary : summaries) {
-                System.out.println(summary.second + " [" + summary.first + "]");
+                float quality = QualityAggregator
+                    .calculate(summary.first, weights);
+
+                StringBuilder sb = new StringBuilder(summary.second);
+                sb.append(" [" + String.format("%.3f", quality) + "]");
+                if (summary.first.size() > 1 && cmd.hasOption("a")) {
+                    for (int i = 0; i < summary.first.size(); ++i) {
+                        if (i == 0) {
+                            sb.append("; ");
+                        } else {
+                            sb.append(", ");
+                        }
+                        sb.append("T" + (i + 1) + " = "
+                            + String.format("%.3f", summary.first.get(i))
+                        );
+                    }
+                }
+                System.out.println(sb.toString());
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
