@@ -80,8 +80,11 @@ public class MainWindow extends Application {
         selectedAbsoluteQuantifiers = new ArrayList<>();
         selectedFeatures = new ArrayList<>();
 
+        Font normalFont = new Font(fontName, fontSize);
+        Font smallFont = new Font(fontName, smallFontSize);
+
         Label quantitiesL = new Label("Quantities:");
-        quantitiesL.setFont(new Font(fontName, fontSize));
+        quantitiesL.setFont(normalFont);
 
         VBox quantitiesVB = new VBox();
         quantitiesVB.setAlignment(Pos.CENTER);
@@ -89,7 +92,7 @@ public class MainWindow extends Application {
 
         for (int n = 0; n < selectionItemsCount; ++n) {
             Label nQuantitiesL = new Label((n + 1) + ". ");
-            nQuantitiesL.setFont(new Font(fontName, fontSize));
+            nQuantitiesL.setFont(normalFont);
             ChoiceBox<String> quantitiesCB = new ChoiceBox<>();
             quantitiesCB
                 .setStyle("-fx-font-size: " + smallFontSize + "px;");
@@ -153,7 +156,7 @@ public class MainWindow extends Application {
         }
 
         Label featuresL = new Label("Features:");
-        featuresL.setFont(new Font(fontName, fontSize));
+        featuresL.setFont(normalFont);
 
         VBox featuresVB = new VBox();
         featuresVB.setAlignment(Pos.CENTER);
@@ -161,7 +164,7 @@ public class MainWindow extends Application {
 
         for (int n = 0; n < selectionItemsCount; ++n) {
             Label nFeaturesL = new Label((n + 1) + ". ");
-            nFeaturesL.setFont(new Font(fontName, fontSize));
+            nFeaturesL.setFont(normalFont);
             ChoiceBox<String> featuresCB = new ChoiceBox<>();
             featuresCB
                 .setStyle("-fx-font-size: " + smallFontSize + "px;");
@@ -222,7 +225,7 @@ public class MainWindow extends Application {
         }
 
         Label qualifiersL = new Label("Criteria:");
-        qualifiersL.setFont(new Font(fontName, fontSize));
+        qualifiersL.setFont(normalFont);
 
         VBox qualifiersVB = new VBox();
         qualifiersVB.setAlignment(Pos.CENTER);
@@ -246,7 +249,7 @@ public class MainWindow extends Application {
         }
 
         Label subjectSelectL = new Label("Subjects:");
-        subjectSelectL.setFont(new Font(fontName, fontSize));
+        subjectSelectL.setFont(normalFont);
 
         VBox subjectSelectVB = new VBox(16);
         subjectSelectVB.setAlignment(Pos.CENTER_LEFT);
@@ -255,7 +258,7 @@ public class MainWindow extends Application {
         ToggleGroup subjectSelectTG = new ToggleGroup();
 
         onlyMalesRB = new RadioButton("Only males");
-        onlyMalesRB.setFont(new Font(fontName, smallFontSize));
+        onlyMalesRB.setFont(smallFont);
         onlyMalesRB.setToggleGroup(subjectSelectTG);
         onlyMalesRB
             .selectedProperty()
@@ -269,7 +272,7 @@ public class MainWindow extends Application {
 
         onlyFemalsRB = new RadioButton("Only females");
         onlyFemalsRB.setToggleGroup(subjectSelectTG);
-        onlyFemalsRB.setFont(new Font(fontName, smallFontSize));
+        onlyFemalsRB.setFont(smallFont);
         onlyFemalsRB
             .selectedProperty()
             .addListener((observable, oldValue, newValue) -> {
@@ -283,7 +286,7 @@ public class MainWindow extends Application {
         bothGendersRB = new RadioButton("Both genders");
         bothGendersRB.setToggleGroup(subjectSelectTG);
         bothGendersRB.setSelected(true);
-        bothGendersRB.setFont(new Font(fontName, smallFontSize));
+        bothGendersRB.setFont(smallFont);
         bothGendersRB
             .selectedProperty()
             .addListener((observable, oldValue, newValue) -> {
@@ -323,10 +326,10 @@ public class MainWindow extends Application {
             );
 
         multiSubjectToggle.selectedProperty().setValue(false);
-        multiSubjectToggle.setFont(new Font(fontName, smallFontSize));
+        multiSubjectToggle.setFont(smallFont);
 
         Button generateBtn = new Button("Generate");
-        generateBtn.setFont(new Font(fontName, fontSize));
+        generateBtn.setFont(normalFont);
         generateBtn.setOnAction(event -> {
             List<QualifierSummarizer> selectedQualifierSummarizers
                 = new ArrayList<>();
@@ -404,7 +407,7 @@ public class MainWindow extends Application {
                             + String.format("%.2f", quality)
                             + "]"
                     );
-                    summaryL.setFont(new Font(fontName, fontSize));
+                    summaryL.setFont(normalFont);
                     summariesVB.getChildren().add(summaryL);
 
                     StringBuilder sb = new StringBuilder();
