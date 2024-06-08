@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.example.Subject.Gender;
 import com.example.SummaryGenerator.SummaryType;
@@ -29,6 +30,8 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
@@ -77,6 +80,8 @@ public class MainWindow extends Application {
     private Button saveSummariesBtn = new Button("Save");
     private ChoiceBox<String> sortByCB = new ChoiceBox<>();
     private HBox sortByHB = new HBox(16);
+    private List<TextField> weightsTF = new ArrayList<>();
+    private HBox weightsAndFormsHB = new HBox();
 
     private int selectionItemsCount = 3;
 
@@ -134,9 +139,13 @@ public class MainWindow extends Application {
                 if (mode == Mode.ADVANCED) {
                     sortByHB.setVisible(true);
                     sortByHB.setManaged(true);
+                    weightsAndFormsHB.setVisible(true);
+                    weightsAndFormsHB.setManaged(true);
                 } else if (mode == Mode.BASIC) {
                     sortByHB.setVisible(false);
                     sortByHB.setManaged(false);
+                    weightsAndFormsHB.setVisible(false);
+                    weightsAndFormsHB.setManaged(false);
                 }
             });
 
@@ -403,6 +412,64 @@ public class MainWindow extends Application {
         multiSubjectToggle.selectedProperty().setValue(false);
         multiSubjectToggle.setFont(smallFont);
 
+        // ------------------------ SET WEIGHTS -----------------------
+        Pattern pattern = Pattern.compile("^(0(\\.\\d{0,9})?|1(\\.0{0,1})?)?$");
+
+        for (int i = 0; i < weights.length; ++i) {
+
+            TextFormatter<String> textFormatter
+                = new TextFormatter<String>(change -> {
+
+                String newText = change.getControlNewText();
+                if (pattern.matcher(newText).matches() || newText.isEmpty()) {
+                    return change;
+                }
+                return null;
+            });
+
+            TextField wtf = new TextField();
+            wtf.setFont(smallFont);
+            wtf.setPrefWidth(70);
+            wtf.setText(String.valueOf(weights[i]));
+            final int idx = i;
+            wtf.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                if (!newValue) { // The TextField has lost focus
+                    weights[idx] = Float.parseFloat(weightsTF.get(idx).getText());
+                }
+            });
+            wtf.setTextFormatter(textFormatter);
+            weightsTF.add(wtf);
+        }
+
+        int rowSize = 3;
+        int hBoxesCount = (weights.length / rowSize)
+            + ((weights.length % rowSize != 0) ? 1 : 0);
+        List<HBox> setWeightsHBes = new ArrayList<>(hBoxesCount);
+        for (int i = 0; i < hBoxesCount; ++i) {
+            HBox setWeightsHB = new HBox();
+            for (int j = i*rowSize; j < (i+1)*rowSize && j < weights.length; ++j) {
+                Label wtfl = new Label("W" + (j + 1));
+                wtfl.setFont(smallFont);
+                wtfl.setMinWidth(70);
+                wtfl.setPadding(new Insets(0, 0, 0, 24));
+                setWeightsHB.getChildren().addAll(wtfl, weightsTF.get(j));
+            }
+            setWeightsHBes.add(setWeightsHB);
+        }
+
+        VBox setWeightsVB = new VBox();
+        for (int i = 0; i < setWeightsHBes.size(); ++i) {
+            setWeightsVB.getChildren().add(setWeightsHBes.get(i));
+        }
+        setWeightsVB.setAlignment(Pos.CENTER);
+        // ------------------------------------------------------------
+
+        weightsAndFormsHB.setAlignment(Pos.CENTER);
+        weightsAndFormsHB.getChildren().add(setWeightsVB);
+        weightsAndFormsHB.setVisible(false);
+        weightsAndFormsHB.setManaged(false);
+
+        // ------------------------- GENERATE -------------------------
         Button generateBtn = new Button("Generate");
         generateBtn.setFont(normalFont);
         generateBtn.setOnAction(event -> {
@@ -486,7 +553,9 @@ public class MainWindow extends Application {
                 e.printStackTrace();
             }
         });
+        // ------------------------------------------------------------
 
+        // --------------------------- SAVE ---------------------------
         saveSummariesBtn.setFont(normalFont);
         saveSummariesBtn.setDisable(true);
         saveSummariesBtn.setOnAction(event -> {
@@ -509,6 +578,7 @@ public class MainWindow extends Application {
                 }
             }
         });
+        // ------------------------------------------------------------
 
         HBox buttonsHB = new HBox(16);
         buttonsHB.setAlignment(Pos.CENTER);
@@ -516,7 +586,7 @@ public class MainWindow extends Application {
             .getChildren()
             .addAll(generateBtn, saveSummariesBtn);
 
-        // ------------------------- SORT BY -------------------------
+        // ------------------------- SORT BY --------------------------
         Label sortByL = new Label("Sort by: ");
         sortByL.setFont(smallFont);
 
@@ -574,7 +644,7 @@ public class MainWindow extends Application {
             .addAll(sortByL, sortByCB);
         sortByHB.setVisible(false);
         sortByHB.setManaged(false);
-        // -----------------------------------------------------------
+        // ------------------------------------------------------------
 
         summariesVB.setAlignment(Pos.CENTER_LEFT);
         summariesVB.setPadding(new Insets(16));
@@ -589,6 +659,7 @@ public class MainWindow extends Application {
             .addAll(
                 menuBar,
                 quantitiesAndFeautersHB,
+                weightsAndFormsHB,
                 multiSubjectToggle,
                 buttonsHB,
                 sortByHB,
