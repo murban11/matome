@@ -738,7 +738,7 @@ public class MainWindow extends Application {
 
         summariesVB.setAlignment(Pos.CENTER_LEFT);
         summariesVB.setPadding(new Insets(16));
-        summariesVB.setSpacing(8);
+        summariesVB.setSpacing(-16);
 
         summariesSP.setFitToWidth(true);
         summariesSP.setContent(summariesVB);
@@ -868,12 +868,14 @@ public class MainWindow extends Application {
         for (var summary : summaries) {
             float quality = QualityAggregator
                 .calculate(summary.first, weights);
-            Label summaryL = new Label(
+            TextField summaryL = new TextField(
                 summary.second + " ["
                     + String.format("%.2f", quality)
                     + "]"
             );
             summaryL.setFont(normalFont);
+            summaryL.setEditable(false);
+            summaryL.setStyle("-fx-background-color: transparent; -fx-border-color: transparent;");
             summariesVB.getChildren().add(summaryL);
 
             StringBuilder sb = new StringBuilder();
