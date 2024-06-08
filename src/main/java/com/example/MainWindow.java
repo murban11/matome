@@ -159,6 +159,7 @@ public class MainWindow extends Application {
         menuBar.getMenus().add(modeMenu);
         // --------------------------------------------------------
 
+        // ----------------- MULTI-SUBJECT TOGGLE -----------------
         multiSubjectToggle
                 .selectedProperty()
                 .addListener((observable, oldValue, newValue) -> {
@@ -172,7 +173,9 @@ public class MainWindow extends Application {
                         }
                     }
                 });
+        // --------------------------------------------------------
 
+        // ---------------------- QUANTITIES ----------------------
         Label quantitiesL = new Label("Quantities:");
         quantitiesL.setFont(normalFont);
 
@@ -248,7 +251,9 @@ public class MainWindow extends Application {
                 .addAll(nQuantitiesL, quantitiesCB);
             quantitiesVB.getChildren().add(nQuantitiesHB);
         }
+        // --------------------------------------------------------
 
+        // ----------------------- FEATURES -----------------------
         Label featuresL = new Label("Features:");
         featuresL.setFont(normalFont);
 
@@ -327,7 +332,9 @@ public class MainWindow extends Application {
                 .addAll(nFeaturesL, featuresCB);
             featuresVB.getChildren().add(nfeaturesHB);
         }
+        // --------------------------------------------------------
 
+        // ---------------------- QUALIFIERS ----------------------
         Label qualifiersL = new Label("Criteria:");
         qualifiersL.setFont(normalFont);
 
@@ -351,7 +358,9 @@ public class MainWindow extends Application {
                 .add(qualifiersCB);
             qualifiersVB.getChildren().add(nQualifiersHB);
         }
+        // --------------------------------------------------------
 
+        // ----------------------- SUBJECTS -----------------------
         Label subjectSelectL = new Label("Subjects:");
         subjectSelectL.setFont(normalFont);
 
@@ -414,6 +423,7 @@ public class MainWindow extends Application {
         subjectSelectVB
             .getChildren()
             .addAll(onlyMalesRB, onlyFemalsRB, bothGendersRB);
+        // --------------------------------------------------------
 
         Region firstSpacer = new Region();
         Region secondSpacer = new Region();
