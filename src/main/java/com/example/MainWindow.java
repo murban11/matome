@@ -1,6 +1,8 @@
 package com.example;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +17,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -29,6 +32,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class MainWindow extends Application {
@@ -63,6 +67,7 @@ public class MainWindow extends Application {
     private RadioButton onlyMalesRB = new RadioButton("Only males");
     private RadioButton onlyFemalsRB = new RadioButton("Only females");
     private RadioButton bothGendersRB = new RadioButton("Both genders");
+    private Button saveSummariesBtn = new Button("Save");
 
     private int selectionItemsCount = 3;
 
@@ -442,10 +447,41 @@ public class MainWindow extends Application {
                     Tooltip.install(summaryL, summaryTT);
                 }
 
+                saveSummariesBtn.setDisable(false);
+
             } catch (Exception e) {
                 e.printStackTrace();
             }
         });
+
+        saveSummariesBtn.setFont(normalFont);
+        saveSummariesBtn.setDisable(true);
+        saveSummariesBtn.setOnAction(event -> {
+            FileChooser fileChooser = new FileChooser();
+            File file = fileChooser.showSaveDialog(stage);
+
+            if (file != null) {
+                List<String> summaries = new ArrayList<>();
+
+                for (Node sl : summariesVB.getChildren()) {
+                    if (sl instanceof Label) {
+                        summaries.add(((Label)sl).getText());
+                    }
+                }
+
+                try {
+                    Files.write(file.toPath(), summaries);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        HBox buttonsHB = new HBox(16);
+        buttonsHB.setAlignment(Pos.CENTER);
+        buttonsHB
+            .getChildren()
+            .addAll(generateBtn, saveSummariesBtn);
 
         summariesVB.setAlignment(Pos.CENTER_LEFT);
         summariesVB.setPadding(new Insets(16));
@@ -460,7 +496,7 @@ public class MainWindow extends Application {
             .addAll(
                 quantitiesAndFeautersHB,
                 multiSubjectToggle,
-                generateBtn,
+                buttonsHB,
                 summariesSP
             );
 
