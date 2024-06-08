@@ -6,10 +6,10 @@ import java.util.List;
 public class SummaryQualityPartComparator
     implements Comparator<Pair<List<Float>, String>> {
 
-    private int n = 1;
+    private int n = 0;
 
     public SummaryQualityPartComparator(int n) throws Exception {
-        if (n < 1 || n > 11) {
+        if (n < 0 || n > 10) {
             throw new Exception("Invalid quality index");
         }
         this.n = n;

@@ -423,7 +423,7 @@ public class MainWindow extends Application {
         subjectSelectVB
             .getChildren()
             .addAll(onlyMalesRB, onlyFemalsRB, bothGendersRB);
-        // --------------------------------------------------------
+        // ----------------------- SUBJECTS -----------------------
 
         Region firstSpacer = new Region();
         Region secondSpacer = new Region();
