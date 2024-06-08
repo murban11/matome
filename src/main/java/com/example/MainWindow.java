@@ -82,6 +82,7 @@ public class MainWindow extends Application {
     private HBox sortByHB = new HBox(16);
     private List<TextField> weightsTF = new ArrayList<>();
     private HBox weightsAndFormsHB = new HBox();
+    private List<CheckBox> formCBes = new ArrayList<>();
 
     private int selectionItemsCount = 3;
 
@@ -91,7 +92,8 @@ public class MainWindow extends Application {
         0.04f, 0.04f, 0.04f, 0.04f, 0.04f
     };
 
-    List<Pair<List<Float>, String>> summaries;
+    private List<Pair<List<Float>, String>> summaries;
+    private short summaryTypes = (short)0b0000000000111111;
 
     private enum Mode {
         BASIC,
@@ -141,17 +143,35 @@ public class MainWindow extends Application {
                     sortByHB.setManaged(true);
                     weightsAndFormsHB.setVisible(true);
                     weightsAndFormsHB.setManaged(true);
+                    multiSubjectToggle.setVisible(false);
+                    multiSubjectToggle.setManaged(false);
                 } else if (mode == Mode.BASIC) {
                     sortByHB.setVisible(false);
                     sortByHB.setManaged(false);
                     weightsAndFormsHB.setVisible(false);
                     weightsAndFormsHB.setManaged(false);
+                    multiSubjectToggle.setVisible(true);
+                    multiSubjectToggle.setManaged(true);
                 }
             });
 
         MenuBar menuBar = new MenuBar();
         menuBar.getMenus().add(modeMenu);
         // --------------------------------------------------------
+
+        multiSubjectToggle
+                .selectedProperty()
+                .addListener((observable, oldValue, newValue) -> {
+                    if (newValue) {
+                        for (int i = 2; i < formCBes.size(); ++i) {
+                            formCBes.get(i).setSelected(true);
+                        }
+                    } else {
+                        for (int i = 2; i < formCBes.size(); ++i) {
+                            formCBes.get(i).setSelected(false);
+                        }
+                    }
+                });
 
         Label quantitiesL = new Label("Quantities:");
         quantitiesL.setFont(normalFont);
@@ -351,6 +371,10 @@ public class MainWindow extends Application {
                     selectedGender = Gender.MALE;
                     multiSubjectToggle.setDisable(true);
                     multiSubjectToggle.selectedProperty().setValue(false);
+                    for (int i = 2; i < formCBes.size(); ++i) {
+                        formCBes.get(i).setSelected(false);
+                        formCBes.get(i).setDisable(true);
+                    }
                 }
         });
 
@@ -364,6 +388,10 @@ public class MainWindow extends Application {
                     selectedGender = Gender.FEMALE;
                     multiSubjectToggle.setDisable(true);
                     multiSubjectToggle.selectedProperty().setValue(false);
+                    for (int i = 2; i < formCBes.size(); ++i) {
+                        formCBes.get(i).setSelected(false);
+                        formCBes.get(i).setDisable(true);
+                    }
                 }
         });
 
@@ -377,6 +405,9 @@ public class MainWindow extends Application {
                 if (newValue) {
                     selectedGender = null;
                     multiSubjectToggle.setDisable(false);
+                    for (int i = 2; i < formCBes.size(); ++i) {
+                        formCBes.get(i).setDisable(false);
+                    }
                 }
         });
 
@@ -464,8 +495,49 @@ public class MainWindow extends Application {
         setWeightsVB.setAlignment(Pos.CENTER);
         // ------------------------------------------------------------
 
+        // ------------------------ SELECT FORM -----------------------
+        for (int i = 0; i < SummaryType.values().length; ++i) {
+            SummaryType type = SummaryType.values()[i];
+            CheckBox formCB = new CheckBox(type.toString());
+            formCB.setFont(smallFont);
+            formCB.setMinWidth(124);
+            final int idx = i;
+            formCB
+                .selectedProperty()
+                .addListener((observable, oldValue, newValue) -> {
+                    if (newValue) {
+                        summaryTypes |= SummaryType.values()[idx].id;
+                    } else {
+                        summaryTypes ^= SummaryType.values()[idx].id;
+                    }
+                });
+            formCB.setSelected(true);
+            formCBes.add(formCB);
+        }
+
+        rowSize = 3;
+        int typeCount = SummaryType.values().length;
+        hBoxesCount = (typeCount / rowSize)
+            + ((typeCount % rowSize != 0) ? 1 : 0);
+        List<HBox> selectFormHBes = new ArrayList<>(hBoxesCount);
+        for (int i = 0; i < hBoxesCount; ++i) {
+            HBox selectFormHB = new HBox();
+            for (int j = i*rowSize; j < (i+1)*rowSize && j < typeCount; ++j) {
+                selectFormHB.getChildren().add(formCBes.get(j));
+            }
+            selectFormHBes.add(selectFormHB);
+        }
+
+        VBox selectFormVB = new VBox();
+        for (int i = 0; i < selectFormHBes.size(); ++i) {
+            selectFormVB.getChildren().add(selectFormHBes.get(i));
+            VBox.setMargin(selectFormHBes.get(i), new Insets(0, 0, 0, 254));
+        }
+        selectFormVB.setAlignment(Pos.CENTER);
+        // ------------------------------------------------------------
+
         weightsAndFormsHB.setAlignment(Pos.CENTER);
-        weightsAndFormsHB.getChildren().add(setWeightsVB);
+        weightsAndFormsHB.getChildren().addAll(setWeightsVB, selectFormVB);
         weightsAndFormsHB.setVisible(false);
         weightsAndFormsHB.setManaged(false);
 
@@ -535,11 +607,13 @@ public class MainWindow extends Application {
                 );
 
                 short type = (short)0b0000000000111111;
-                if (!multiSubjectToggle.isSelected()) {
+                if (!multiSubjectToggle.isSelected() && mode == Mode.BASIC) {
                     type ^= SummaryType.MS1.id;
                     type ^= SummaryType.MS2.id;
                     type ^= SummaryType.MS3.id;
                     type ^= SummaryType.MS4.id;
+                } else if (mode == Mode.ADVANCED) {
+                    type = summaryTypes;
                 }
 
                 summaries = generator.generate(type);
