@@ -489,6 +489,9 @@ public class MainWindow extends Application {
         }
 
         VBox setWeightsVB = new VBox();
+        Label setWeightsL = new Label("Weights:");
+        setWeightsL.setFont(normalFont);
+        setWeightsVB.getChildren().add(setWeightsL);
         for (int i = 0; i < setWeightsHBes.size(); ++i) {
             setWeightsVB.getChildren().add(setWeightsHBes.get(i));
         }
@@ -529,6 +532,9 @@ public class MainWindow extends Application {
         }
 
         VBox selectFormVB = new VBox();
+        Label selectFormL = new Label("Forms:");
+        selectFormL.setFont(normalFont);
+        selectFormVB.getChildren().add(selectFormL);
         for (int i = 0; i < selectFormHBes.size(); ++i) {
             selectFormVB.getChildren().add(selectFormHBes.get(i));
             VBox.setMargin(selectFormHBes.get(i), new Insets(0, 0, 0, 254));
