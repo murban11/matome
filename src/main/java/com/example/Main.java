@@ -68,6 +68,14 @@ public class Main {
             .build();
         options.addOption(showAllQualitiesOption);
 
+        Option minT1Option = Option.builder(null)
+            .longOpt("min-t1")
+            .argName("value")
+            .hasArg()
+            .desc("Filter out the summaries with T1 lower than value")
+            .build();
+        options.addOption(minT1Option);
+
         Option help = Option.builder("h")
             .longOpt("help")
             .desc("Display help and exit")
@@ -112,6 +120,11 @@ public class Main {
             List<Subject> subjects = Subject.loadFromFile(datasetFile);
             Config config = Config.load(configFile, subjects.size());
 
+            float min_t1 = 0.0f;
+            if (cmd.hasOption("min-t1")) {
+                min_t1 = Float.valueOf(cmd.getOptionValue("min-t1"));
+            }
+
             float[] weights = {
                 0.3f,
                 0.1f, 0.1f, 0.1f, 0.1f, 0.1f,
@@ -139,7 +152,8 @@ public class Main {
                 config.qualifierSummarizers,
                 weights,
                 subjects,
-                subjectName
+                subjectName,
+                min_t1
             );
 
             List<Pair<List<Float>, String>> summaries

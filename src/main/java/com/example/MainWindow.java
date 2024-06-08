@@ -378,6 +378,7 @@ public class MainWindow extends Application {
             try {
                 String subjectName = "people";
                 List<Subject> filteredSubjects = subjects;
+                float min_t1 = 0.3f;
 
                 if (
                     selectedGender != null
@@ -401,7 +402,8 @@ public class MainWindow extends Application {
                     selectedQualifierSummarizers,
                     weights,
                     filteredSubjects,
-                    subjectName
+                    subjectName,
+                    min_t1
                 );
 
                 short type = (short)0b0000000000111111;

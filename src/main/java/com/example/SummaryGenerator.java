@@ -29,6 +29,7 @@ public class SummaryGenerator {
     private float[] qualityWeights;
     private List<Subject> subjects;
     private String subjectName;
+    private float min_t1;
 
     private List<Subject> males;
     private List<Subject> females;
@@ -39,7 +40,8 @@ public class SummaryGenerator {
         List<QualifierSummarizer> qualifierSummarizers,
         float[] qualityWeights,
         List<Subject> subjects,
-        String subjectName
+        String subjectName,
+        float min_t1
     ) throws Exception {
         if (relativeQuantifiers != null) {
             this.relativeQuantifiers = new ArrayList<>(relativeQuantifiers);
@@ -55,6 +57,7 @@ public class SummaryGenerator {
         this.qualityWeights = qualityWeights.clone();
         this.subjects = new ArrayList<>(subjects);
         this.subjectName = subjectName;
+        this.min_t1 = min_t1;
 
         this.males = new ArrayList<>();
         this.females = new ArrayList<>();
@@ -112,20 +115,24 @@ public class SummaryGenerator {
                         summarizers,
                         qualityWeights
                     );
-                    summaries.add(new Pair<List<Float>, String>(
-                        summary.getQualities(subjects),
-                        summary.toString(subjectName)
-                    ));
+                    if (summary.getQuality(0, subjects) >= min_t1) {
+                        summaries.add(new Pair<List<Float>, String>(
+                            summary.getQualities(subjects),
+                            summary.toString(subjectName)
+                        ));
+                    }
                 } else if (quantifier instanceof AbsoluteQuantifier) {
                     Summary summary = new Summary(
                         (AbsoluteQuantifier)quantifier,
                         summarizers,
                         qualityWeights
                     );
-                    summaries.add(new Pair<List<Float>, String>(
-                        summary.getQualities(subjects),
-                        summary.toString(subjectName)
-                    ));
+                    if (summary.getQuality(0, subjects) >= min_t1) {
+                        summaries.add(new Pair<List<Float>, String>(
+                            summary.getQualities(subjects),
+                            summary.toString(subjectName)
+                        ));
+                    }
                 } else {
                     assert(false);
                 }
@@ -144,10 +151,12 @@ public class SummaryGenerator {
                             summarizers,
                             qualityWeights
                         );
-                        summaries.add(new Pair<List<Float>, String>(
-                            summary.getQualities(subjects),
-                            summary.toString(subjectName)
-                        ));
+                        if (summary.getQuality(0, subjects) >= min_t1) {
+                            summaries.add(new Pair<List<Float>, String>(
+                                summary.getQualities(subjects),
+                                summary.toString(subjectName)
+                            ));
+                        }
                     }
                 }
             }
@@ -170,14 +179,18 @@ public class SummaryGenerator {
                 MultiSubjectSummary f4summary = new MultiSubjectSummary(
                     summarizers
                 );
-                summaries.add(new Pair<List<Float>, String>(
-                    Arrays.asList(f4summary.getQuality(males, females)),
-                    f4summary.toString("males", "females")
-                ));
-                summaries.add(new Pair<List<Float>, String>(
-                    Arrays.asList(f4summary.getQuality(females, males)),
-                    f4summary.toString("females", "males")
-                ));
+                if (f4summary.getQuality(males, females) >= min_t1) {
+                    summaries.add(new Pair<List<Float>, String>(
+                        Arrays.asList(f4summary.getQuality(males, females)),
+                        f4summary.toString("males", "females")
+                    ));
+                }
+                if (f4summary.getQuality(females, males) >= min_t1) {
+                    summaries.add(new Pair<List<Float>, String>(
+                        Arrays.asList(f4summary.getQuality(females, males)),
+                        f4summary.toString("females", "males")
+                    ));
+                }
             }
 
             for (var quantifier : quantifiers) {
@@ -186,14 +199,18 @@ public class SummaryGenerator {
                         quantifier,
                         summarizers
                     );
-                    summaries.add(new Pair<List<Float>, String>(
-                        Arrays.asList(f1summary.getQuality(males, females)),
-                        f1summary.toString("males", "females")
-                    ));
-                    summaries.add(new Pair<List<Float>, String>(
-                        Arrays.asList(f1summary.getQuality(females, males)),
-                        f1summary.toString("females", "males")
-                    ));
+                    if (f1summary.getQuality(males, females) >= min_t1) {
+                        summaries.add(new Pair<List<Float>, String>(
+                            Arrays.asList(f1summary.getQuality(males, females)),
+                            f1summary.toString("males", "females")
+                        ));
+                    }
+                    if (f1summary.getQuality(females, males) >= min_t1) {
+                        summaries.add(new Pair<List<Float>, String>(
+                            Arrays.asList(f1summary.getQuality(females, males)),
+                            f1summary.toString("females", "males")
+                        ));
+                    }
                 }
             }
 
@@ -209,14 +226,18 @@ public class SummaryGenerator {
                             summarizers,
                             FORM.F2
                         );
-                        summaries.add(new Pair<List<Float>, String>(
-                            Arrays.asList(f2summary.getQuality(males, females)),
-                            f2summary.toString("males", "females")
-                        ));
-                        summaries.add(new Pair<List<Float>, String>(
-                            Arrays.asList(f2summary.getQuality(females, males)),
-                            f2summary.toString("females", "males")
-                        ));
+                        if (f2summary.getQuality(males, females) >= min_t1) {
+                            summaries.add(new Pair<List<Float>, String>(
+                                Arrays.asList(f2summary.getQuality(males, females)),
+                                f2summary.toString("males", "females")
+                            ));
+                        }
+                        if (f2summary.getQuality(females, males) >= min_t1) {
+                            summaries.add(new Pair<List<Float>, String>(
+                                Arrays.asList(f2summary.getQuality(females, males)),
+                                f2summary.toString("females", "males")
+                            ));
+                        }
                     }
                     if ((type & SummaryType.MS3.id) > 0) {
                         MultiSubjectSummary f3summary = new MultiSubjectSummary(
@@ -225,14 +246,18 @@ public class SummaryGenerator {
                             summarizers,
                             FORM.F3
                         );
-                        summaries.add(new Pair<List<Float>, String>(
-                            Arrays.asList(f3summary.getQuality(males, females)),
-                            f3summary.toString("males", "females")
-                        ));
-                        summaries.add(new Pair<List<Float>, String>(
-                            Arrays.asList(f3summary.getQuality(females, males)),
-                            f3summary.toString("females", "males")
-                        ));
+                        if (f3summary.getQuality(males, females) >= min_t1) {
+                            summaries.add(new Pair<List<Float>, String>(
+                                Arrays.asList(f3summary.getQuality(males, females)),
+                                f3summary.toString("males", "females")
+                            ));
+                        }
+                        if (f3summary.getQuality(females, males) >= min_t1) {
+                            summaries.add(new Pair<List<Float>, String>(
+                                Arrays.asList(f3summary.getQuality(females, males)),
+                                f3summary.toString("females", "males")
+                            ));
+                        }
                     }
                 }
             }
