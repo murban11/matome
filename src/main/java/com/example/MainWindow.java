@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.example.Subject.Gender;
@@ -25,7 +26,6 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ScrollPane;
@@ -48,6 +48,9 @@ public class MainWindow extends Application {
     private final int fontSize = 32;
     private final int smallFontSize = 20;
     private final int choiceBoxPrefWidth = 320;
+
+    private final Font normalFont = new Font(fontName, fontSize);
+    private final Font smallFont = new Font(fontName, smallFontSize);
 
     private List<RelativeQuantifier> relativeQuantifiers;
     private List<AbsoluteQuantifier> absoluteQuantifiers;
@@ -72,6 +75,8 @@ public class MainWindow extends Application {
     private RadioButton onlyFemalsRB = new RadioButton("Only females");
     private RadioButton bothGendersRB = new RadioButton("Both genders");
     private Button saveSummariesBtn = new Button("Save");
+    private ChoiceBox<String> sortByCB = new ChoiceBox<>();
+    private HBox sortByHB = new HBox(16);
 
     private int selectionItemsCount = 3;
 
@@ -80,6 +85,8 @@ public class MainWindow extends Application {
         0.1f, 0.1f, 0.1f, 0.1f, 0.1f,
         0.04f, 0.04f, 0.04f, 0.04f, 0.04f
     };
+
+    List<Pair<List<Float>, String>> summaries;
 
     private enum Mode {
         BASIC,
@@ -95,9 +102,6 @@ public class MainWindow extends Application {
         selectedRelativeQuantifiers = new ArrayList<>();
         selectedAbsoluteQuantifiers = new ArrayList<>();
         selectedFeatures = new ArrayList<>();
-
-        Font normalFont = new Font(fontName, fontSize);
-        Font smallFont = new Font(fontName, smallFontSize);
 
         // ------------------------- MENU -------------------------
         Menu modeMenu = new Menu("Mode");
@@ -123,7 +127,16 @@ public class MainWindow extends Application {
                     String currentModeStr = m.toString().toLowerCase();
                     if (currentModeStr.equals(selectedModeStr)) {
                         mode = m;
+                        break;
                     }
+                }
+
+                if (mode == Mode.ADVANCED) {
+                    sortByHB.setVisible(true);
+                    sortByHB.setManaged(true);
+                } else if (mode == Mode.BASIC) {
+                    sortByHB.setVisible(false);
+                    sortByHB.setManaged(false);
                 }
             });
 
@@ -462,35 +475,12 @@ public class MainWindow extends Application {
                     type ^= SummaryType.MS4.id;
                 }
 
-                List<Pair<List<Float>, String>> summaries
-                    = generator.generate(type);
+                summaries = generator.generate(type);
 
-                summariesVB.getChildren().clear();
-                for (var summary : summaries) {
-                    float quality = QualityAggregator
-                        .calculate(summary.first, weights);
-                    Label summaryL = new Label(
-                        summary.second + " ["
-                            + String.format("%.2f", quality)
-                            + "]"
-                    );
-                    summaryL.setFont(normalFont);
-                    summariesVB.getChildren().add(summaryL);
-
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < summary.first.size(); ++i) {
-                        if (i != 0) sb.append(", ");
-                        sb.append(
-                            "T" + (i + 1) + " = "
-                                + String.format("%.2f", summary.first.get(i))
-                        );
-                    }
-
-					Tooltip summaryTT = new Tooltip(sb.toString());
-                    Tooltip.install(summaryL, summaryTT);
-                }
+                updateSummaryList();
 
                 saveSummariesBtn.setDisable(false);
+                sortByCB.setDisable(false);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -526,6 +516,66 @@ public class MainWindow extends Application {
             .getChildren()
             .addAll(generateBtn, saveSummariesBtn);
 
+        // ------------------------- SORT BY -------------------------
+        Label sortByL = new Label("Sort by: ");
+        sortByL.setFont(smallFont);
+
+        sortByCB = new ChoiceBox<>();
+        sortByCB
+            .setStyle("-fx-font-size: " + smallFontSize + "px;");
+        sortByCB.setPrefWidth(choiceBoxPrefWidth);
+        sortByCB.getItems().add("T");
+        for (int i = 1; i <= 11; ++i) {
+            sortByCB.getItems().add("T" + i);
+        }
+        sortByCB.setDisable(true);
+        sortByCB
+            .getSelectionModel()
+            .selectedItemProperty()
+            .addListener(new ChangeListener<String>() {
+
+                @Override
+                public void changed(
+                    ObservableValue<? extends String> observable,
+                    String oldValue,
+                    String newValue
+                ) {
+                    if (newValue.equals(oldValue)) return;
+                    if (summaries == null) return;
+
+                    if (newValue.equals("T")) {
+                        SummaryQualityComparator comparator
+                            = new SummaryQualityComparator(weights);
+                        Collections.sort(
+                            summaries,
+                            Collections.reverseOrder(comparator)
+                        );
+                        updateSummaryList();
+                    } else {
+                        int n = Integer.parseInt(newValue.substring(1)) - 1;
+                        SummaryQualityPartComparator comparator;
+                        try {
+                            comparator = new SummaryQualityPartComparator(n);
+                            Collections.sort(
+                                summaries,
+                                Collections.reverseOrder(comparator)
+                            );
+                            updateSummaryList();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
+
+        sortByHB.setAlignment(Pos.CENTER_LEFT);
+        sortByHB
+            .getChildren()
+            .addAll(sortByL, sortByCB);
+        sortByHB.setVisible(false);
+        sortByHB.setManaged(false);
+        // -----------------------------------------------------------
+
         summariesVB.setAlignment(Pos.CENTER_LEFT);
         summariesVB.setPadding(new Insets(16));
         summariesVB.setSpacing(8);
@@ -541,6 +591,7 @@ public class MainWindow extends Application {
                 quantitiesAndFeautersHB,
                 multiSubjectToggle,
                 buttonsHB,
+                sortByHB,
                 summariesSP
             );
 
@@ -648,6 +699,33 @@ public class MainWindow extends Application {
                     fcb.getItems().add(f.name);
                 }
             }
+        }
+    }
+
+    private void updateSummaryList() {
+        summariesVB.getChildren().clear();
+        for (var summary : summaries) {
+            float quality = QualityAggregator
+                .calculate(summary.first, weights);
+            Label summaryL = new Label(
+                summary.second + " ["
+                    + String.format("%.2f", quality)
+                    + "]"
+            );
+            summaryL.setFont(normalFont);
+            summariesVB.getChildren().add(summaryL);
+
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < summary.first.size(); ++i) {
+                if (i != 0) sb.append(", ");
+                sb.append(
+                    "T" + (i + 1) + " = "
+                        + String.format("%.2f", summary.first.get(i))
+                );
+            }
+
+            Tooltip summaryTT = new Tooltip(sb.toString());
+            Tooltip.install(summaryL, summaryTT);
         }
     }
 }
