@@ -23,7 +23,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
+import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
@@ -77,6 +81,13 @@ public class MainWindow extends Application {
         0.04f, 0.04f, 0.04f, 0.04f, 0.04f
     };
 
+    private enum Mode {
+        BASIC,
+        ADVANCED
+    };
+
+    private Mode mode = Mode.BASIC;
+
     @Override
     public void start(Stage stage) throws Exception {
         loadData();
@@ -87,6 +98,38 @@ public class MainWindow extends Application {
 
         Font normalFont = new Font(fontName, fontSize);
         Font smallFont = new Font(fontName, smallFontSize);
+
+        // ------------------------- MENU -------------------------
+        Menu modeMenu = new Menu("Mode");
+
+        RadioMenuItem basicMode = new RadioMenuItem("Basic");
+        RadioMenuItem advancedMode = new RadioMenuItem("Advanced");
+        modeMenu.getItems().addAll(basicMode, advancedMode);
+
+        ToggleGroup modeGroup = new ToggleGroup();
+        basicMode.setToggleGroup(modeGroup);
+        advancedMode.setToggleGroup(modeGroup);
+
+        basicMode.setSelected(true);
+
+        modeGroup
+            .selectedToggleProperty()
+            .addListener((observable, oldValue, newValue) -> {
+                RadioMenuItem selectedMode = (RadioMenuItem) newValue;
+
+                for (var m : Mode.values()) {
+                    String selectedModeStr
+                        = selectedMode.getText().toLowerCase();
+                    String currentModeStr = m.toString().toLowerCase();
+                    if (currentModeStr.equals(selectedModeStr)) {
+                        mode = m;
+                    }
+                }
+            });
+
+        MenuBar menuBar = new MenuBar();
+        menuBar.getMenus().add(modeMenu);
+        // --------------------------------------------------------
 
         Label quantitiesL = new Label("Quantities:");
         quantitiesL.setFont(normalFont);
@@ -491,9 +534,10 @@ public class MainWindow extends Application {
         summariesSP.setContent(summariesVB);
 
         VBox vbox = new VBox(16);
-        vbox.setAlignment(Pos.CENTER);
+        vbox.setAlignment(Pos.TOP_CENTER);
         vbox.getChildren()
             .addAll(
+                menuBar,
                 quantitiesAndFeautersHB,
                 multiSubjectToggle,
                 buttonsHB,
