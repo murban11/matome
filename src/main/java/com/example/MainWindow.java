@@ -102,6 +102,10 @@ public class MainWindow extends Application {
             for (var quantifier : absoluteQuantifiers) {
                 quantitiesCB.getItems().add(quantifier.getLabel());
             }
+
+            // Add empty choice to allow to unselect choicess
+            quantitiesCB.getItems().add("");
+
             quantitiesCB.setPrefWidth(choiceBoxPrefWidth);
             quantitiesCB
                 .getSelectionModel()
@@ -173,6 +177,9 @@ public class MainWindow extends Application {
                 featuresCB.getItems().add(feature.name);
             }
 
+            // Add empty choice to allow to unselect choicess
+            featuresCB.getItems().add("");
+
             final int idx = n;
             featuresCB
                 .getSelectionModel()
@@ -211,7 +218,14 @@ public class MainWindow extends Application {
                                         .add(qs.getLabel());
                                 }
                             }
+
+                            // Add empty choice to allow to unselect choicess
+                            qualifiersCBes.get(idx).getItems().add("");
+
                             qualifiersCBes.get(idx).setDisable(false);
+                        } else {
+                            qualifiersCBes.get(idx).getItems().clear();
+                            qualifiersCBes.get(idx).setDisable(true);
                         }
                     }
                 });
@@ -340,7 +354,10 @@ public class MainWindow extends Application {
                     continue;
                 }
 
-                if (qualifiersCBes.get(i).getValue() == null) {
+                if (
+                    qualifiersCBes.get(i).getValue() == null
+                        || qualifiersCBes.get(i).getValue().isEmpty()
+                ) {
                     for (var qs : qualifierSummarizers) {
                         if (qs.getFeature().equals(feature)) {
                             selectedQualifierSummarizers.add(qs);
