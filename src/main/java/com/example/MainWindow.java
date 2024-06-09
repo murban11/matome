@@ -79,7 +79,7 @@ public class MainWindow extends Application {
     private RadioButton bothGendersRB = new RadioButton("Both genders");
     private Button saveSummariesBtn = new Button("Save");
     private ChoiceBox<String> sortByCB = new ChoiceBox<>();
-    private HBox sortByHB = new HBox(16);
+    private HBox sortByAndLimitHB = new HBox(16);
     private List<TextField> weightsTF = new ArrayList<>();
     private HBox weightsAndFormsHB = new HBox();
     private List<CheckBox> formCBes = new ArrayList<>();
@@ -94,6 +94,7 @@ public class MainWindow extends Application {
 
     private List<Pair<List<Float>, String>> summaries;
     private short summaryTypes = (short)0b0000000000111111;
+    private int summaryLimit = 0; // 0 means no limit
 
     private enum Mode {
         BASIC,
@@ -139,19 +140,20 @@ public class MainWindow extends Application {
                 }
 
                 if (mode == Mode.ADVANCED) {
-                    sortByHB.setVisible(true);
-                    sortByHB.setManaged(true);
+                    sortByAndLimitHB.setVisible(true);
+                    sortByAndLimitHB.setManaged(true);
                     weightsAndFormsHB.setVisible(true);
                     weightsAndFormsHB.setManaged(true);
                     multiSubjectToggle.setVisible(false);
                     multiSubjectToggle.setManaged(false);
                 } else if (mode == Mode.BASIC) {
-                    sortByHB.setVisible(false);
-                    sortByHB.setManaged(false);
+                    sortByAndLimitHB.setVisible(false);
+                    sortByAndLimitHB.setManaged(false);
                     weightsAndFormsHB.setVisible(false);
                     weightsAndFormsHB.setManaged(false);
                     multiSubjectToggle.setVisible(true);
                     multiSubjectToggle.setManaged(true);
+                    summaryLimit = 0;
                 }
             });
 
@@ -423,7 +425,7 @@ public class MainWindow extends Application {
         subjectSelectVB
             .getChildren()
             .addAll(onlyMalesRB, onlyFemalsRB, bothGendersRB);
-        // ----------------------- SUBJECTS -----------------------
+        // --------------------------------------------------------
 
         Region firstSpacer = new Region();
         Region secondSpacer = new Region();
@@ -656,8 +658,8 @@ public class MainWindow extends Application {
                 List<String> summaries = new ArrayList<>();
 
                 for (Node sl : summariesVB.getChildren()) {
-                    if (sl instanceof Label) {
-                        summaries.add(((Label)sl).getText());
+                    if (sl instanceof TextField) {
+                        summaries.add(((TextField)sl).getText());
                     }
                 }
 
@@ -727,14 +729,52 @@ public class MainWindow extends Application {
                     }
                 }
             });
-
-        sortByHB.setAlignment(Pos.CENTER_LEFT);
-        sortByHB
-            .getChildren()
-            .addAll(sortByL, sortByCB);
-        sortByHB.setVisible(false);
-        sortByHB.setManaged(false);
         // ------------------------------------------------------------
+
+        // -------------------------- LIMIT ---------------------------
+        Label limitL = new Label("Limit: ");
+        limitL.setFont(smallFont);
+
+        Pattern limitPattern = Pattern.compile("^([1-9](\\d{0,9})?)$");
+
+        TextFormatter<String> textFormatter
+            = new TextFormatter<String>(change -> {
+
+            String newText = change.getControlNewText();
+            if (limitPattern.matcher(newText).matches() || newText.isEmpty()) {
+                return change;
+            }
+            return null;
+        });
+
+        TextField limitTF = new TextField();
+        limitTF.setFont(smallFont);
+        limitTF.setPrefWidth(choiceBoxPrefWidth);
+        limitTF.setTextFormatter(textFormatter);
+        limitTF
+            .focusedProperty()
+            .addListener((observable, oldValue, newValue) -> {
+                if (!newValue) {
+                    if (limitTF.getText().isEmpty()) {
+                        summaryLimit = 0;
+                    } else {
+                        summaryLimit = Integer.parseInt(limitTF.getText());
+                    }
+                    updateSummaryList();
+                }
+            });
+        // ------------------------------------------------------------
+
+        Region sortByAndLimitSpacer = new Region();
+        HBox.setHgrow(sortByAndLimitSpacer, Priority.ALWAYS);
+
+        sortByAndLimitHB.setAlignment(Pos.CENTER_LEFT);
+        sortByAndLimitHB
+            .getChildren()
+            .addAll(sortByL, sortByCB, sortByAndLimitSpacer, limitL, limitTF);
+        VBox.setMargin(sortByAndLimitHB, new Insets(0, 16, 0, 16));
+        sortByAndLimitHB.setVisible(false);
+        sortByAndLimitHB.setManaged(false);
 
         summariesVB.setAlignment(Pos.CENTER_LEFT);
         summariesVB.setPadding(new Insets(16));
@@ -752,7 +792,7 @@ public class MainWindow extends Application {
                 weightsAndFormsHB,
                 multiSubjectToggle,
                 buttonsHB,
-                sortByHB,
+                sortByAndLimitHB,
                 summariesSP
             );
 
@@ -865,11 +905,13 @@ public class MainWindow extends Application {
 
     private void updateSummaryList() {
         summariesVB.getChildren().clear();
-        for (var summary : summaries) {
+        int limit = (summaryLimit == 0)
+            ? summaries.size() : Math.min(summaries.size(), summaryLimit);
+        for (int i = 0; i < limit; ++i) {
             float quality = QualityAggregator
-                .calculate(summary.first, weights);
+                .calculate(summaries.get(i).first, weights);
             TextField summaryL = new TextField(
-                summary.second + " ["
+                summaries.get(i).second + " ["
                     + String.format("%.2f", quality)
                     + "]"
             );
@@ -879,11 +921,11 @@ public class MainWindow extends Application {
             summariesVB.getChildren().add(summaryL);
 
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < summary.first.size(); ++i) {
-                if (i != 0) sb.append(", ");
+            for (int j = 0; j < summaries.get(j).first.size(); ++j) {
+                if (j != 0) sb.append(", ");
                 sb.append(
-                    "T" + (i + 1) + " = "
-                        + String.format("%.2f", summary.first.get(i))
+                    "T" + (j + 1) + " = "
+                        + String.format("%.2f", summaries.get(j).first.get(j))
                 );
             }
 
