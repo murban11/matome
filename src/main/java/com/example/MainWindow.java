@@ -769,16 +769,14 @@ public class MainWindow extends Application {
         limitTF.setPrefWidth(choiceBoxPrefWidth);
         limitTF.setTextFormatter(textFormatter);
         limitTF
-            .focusedProperty()
+            .textProperty()
             .addListener((observable, oldValue, newValue) -> {
-                if (!newValue) {
-                    if (limitTF.getText().isEmpty()) {
-                        summaryLimit = 0;
-                    } else {
-                        summaryLimit = Integer.parseInt(limitTF.getText());
-                    }
-                    updateSummaryList();
+                if (newValue.isEmpty()) {
+                    summaryLimit = 0;
+                } else {
+                    summaryLimit = Integer.parseInt(newValue);
                 }
+                updateSummaryList();
             });
         // ------------------------------------------------------------
 
