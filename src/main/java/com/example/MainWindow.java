@@ -21,6 +21,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -34,6 +35,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.control.Tooltip;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -594,6 +596,21 @@ public class MainWindow extends Application {
             }
 
             try {
+                float weightsSum = 0.0f;
+                for (int i = 0; i < weights.length; ++i) {
+                    weightsSum += weights[i];
+                }
+                if (Math.abs(weightsSum - 1) > 0.001f) {
+                    String errorMsg = "Weights does not sum up to 1.0";
+                    Alert alert = new Alert(AlertType.ERROR);
+                    alert.setTitle("Invalid weights");
+                    alert.setHeaderText(null);
+                    alert.setContentText(errorMsg);
+                    alert.showAndWait();
+
+                    throw new Exception(errorMsg);
+                }
+
                 String subjectName = "people";
                 List<Subject> filteredSubjects = subjects;
                 float min_t1 = 0.3f;
