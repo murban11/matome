@@ -2,6 +2,7 @@ package com.example;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,9 +29,11 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.RadioButton;
 import javafx.scene.control.RadioMenuItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.control.ToggleGroup;
@@ -100,68 +103,26 @@ public class MainWindow extends Application {
 
     private enum Mode {
         BASIC,
-        ADVANCED
+        ADVANCED,
+        CONFIG
     };
 
     private Mode mode = Mode.BASIC;
 
+    private Stage primaryStage;
+    private Stage configStage = new Stage();
+
     @Override
     public void start(Stage stage) throws Exception {
+        primaryStage = stage;
+
         loadData();
 
         selectedRelativeQuantifiers = new ArrayList<>();
         selectedAbsoluteQuantifiers = new ArrayList<>();
         selectedFeatures = new ArrayList<>();
 
-        // ------------------------- MENU -------------------------
-        Menu modeMenu = new Menu("Mode");
-
-        RadioMenuItem basicMode = new RadioMenuItem("Basic");
-        RadioMenuItem advancedMode = new RadioMenuItem("Advanced");
-        modeMenu.getItems().addAll(basicMode, advancedMode);
-
-        ToggleGroup modeGroup = new ToggleGroup();
-        basicMode.setToggleGroup(modeGroup);
-        advancedMode.setToggleGroup(modeGroup);
-
-        basicMode.setSelected(true);
-
-        modeGroup
-            .selectedToggleProperty()
-            .addListener((observable, oldValue, newValue) -> {
-                RadioMenuItem selectedMode = (RadioMenuItem) newValue;
-
-                for (var m : Mode.values()) {
-                    String selectedModeStr
-                        = selectedMode.getText().toLowerCase();
-                    String currentModeStr = m.toString().toLowerCase();
-                    if (currentModeStr.equals(selectedModeStr)) {
-                        mode = m;
-                        break;
-                    }
-                }
-
-                if (mode == Mode.ADVANCED) {
-                    sortByAndLimitHB.setVisible(true);
-                    sortByAndLimitHB.setManaged(true);
-                    weightsAndFormsHB.setVisible(true);
-                    weightsAndFormsHB.setManaged(true);
-                    multiSubjectToggle.setVisible(false);
-                    multiSubjectToggle.setManaged(false);
-                } else if (mode == Mode.BASIC) {
-                    sortByAndLimitHB.setVisible(false);
-                    sortByAndLimitHB.setManaged(false);
-                    weightsAndFormsHB.setVisible(false);
-                    weightsAndFormsHB.setManaged(false);
-                    multiSubjectToggle.setVisible(true);
-                    multiSubjectToggle.setManaged(true);
-                    summaryLimit = 0;
-                }
-            });
-
-        MenuBar menuBar = new MenuBar();
-        menuBar.getMenus().add(modeMenu);
-        // --------------------------------------------------------
+        MenuBar menuBar = createMenuBar();
 
         // ----------------- MULTI-SUBJECT TOGGLE -----------------
         multiSubjectToggle
@@ -816,8 +777,134 @@ public class MainWindow extends Application {
         stage.show();
     }
 
+    private void showConfigStage(Stage configStage) {
+        MenuBar menuBar = createMenuBar();
+
+        TextArea code = new TextArea();
+        VBox.setVgrow(code, Priority.ALWAYS);
+        code.setFont(smallFont);
+
+        Button save = new Button("Save");
+        save.setFont(normalFont);
+        save.setOnAction(e -> {
+            String content = code.getText();
+            File file = new File("config.json");
+            try {
+                Files.writeString(
+                    file.toPath(), content, StandardCharsets.UTF_8
+                );
+                loadData();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            } finally {
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("Success");
+                alert.setHeaderText(null);
+                alert.setContentText("Config saved successfully");
+                alert.showAndWait();
+            }
+        });
+
+        VBox inner = new VBox(16);
+        inner.setAlignment(Pos.TOP_CENTER);
+        inner.setPadding(new Insets(16));
+        inner.getChildren().addAll(code, save);
+        VBox.setVgrow(inner, Priority.ALWAYS);
+
+        VBox vbox = new VBox(16);
+        vbox.setAlignment(Pos.TOP_CENTER);
+        vbox.getChildren().addAll(menuBar, inner);
+
+        File file = new File("config.json");
+        try {
+            String content
+                = Files.readString(file.toPath(), StandardCharsets.UTF_8);
+            code.setText(content);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        configStage.setScene(new Scene(vbox));
+        configStage.setTitle("Matome");
+        configStage.show();
+    }
+
+    private MenuBar createMenuBar() {
+        MenuBar menuBar = new MenuBar();
+        Menu modeMenu = new Menu("Mode");
+
+        RadioMenuItem basicMode = new RadioMenuItem("Basic");
+        RadioMenuItem advancedMode = new RadioMenuItem("Advanced");
+
+        ToggleGroup modeGroup = new ToggleGroup();
+        basicMode.setToggleGroup(modeGroup);
+        advancedMode.setToggleGroup(modeGroup);
+
+        basicMode.setSelected((mode == Mode.BASIC));
+        advancedMode.setSelected((mode == Mode.ADVANCED));
+
+        if (mode == Mode.CONFIG) {
+            RadioMenuItem configMode = new RadioMenuItem("Config");
+            configMode.setToggleGroup(modeGroup);
+            configMode.setSelected((mode == Mode.CONFIG));
+
+            modeMenu.getItems().addAll(basicMode, advancedMode, configMode);
+        } else {
+            MenuItem configMode = new MenuItem("Config");
+            configMode.setOnAction(e -> {
+                    mode = Mode.CONFIG;
+                    showConfigStage(configStage);
+                    primaryStage.hide();
+                });
+
+            modeMenu.getItems().addAll(basicMode, advancedMode, configMode);
+        }
+
+        modeGroup
+            .selectedToggleProperty()
+            .addListener((observable, oldValue, newValue) -> {
+                RadioMenuItem selectedMode = (RadioMenuItem) newValue;
+
+                for (var m : Mode.values()) {
+                    String selectedModeStr
+                    = selectedMode.getText().toLowerCase();
+                    String currentModeStr = m.toString().toLowerCase();
+                    if (currentModeStr.equals(selectedModeStr)) {
+                        mode = m;
+                        break;
+                    }
+                }
+
+                if (mode == Mode.ADVANCED) {
+                    sortByAndLimitHB.setVisible(true);
+                    sortByAndLimitHB.setManaged(true);
+                    weightsAndFormsHB.setVisible(true);
+                    weightsAndFormsHB.setManaged(true);
+                    multiSubjectToggle.setVisible(false);
+                    multiSubjectToggle.setManaged(false);
+
+                    configStage.hide();
+                    primaryStage.show();
+                } else if (mode == Mode.BASIC) {
+                    sortByAndLimitHB.setVisible(false);
+                    sortByAndLimitHB.setManaged(false);
+                    weightsAndFormsHB.setVisible(false);
+                    weightsAndFormsHB.setManaged(false);
+                    multiSubjectToggle.setVisible(true);
+                    multiSubjectToggle.setManaged(true);
+                    summaryLimit = 0;
+
+                    configStage.hide();
+                    primaryStage.show();
+                }
+            });
+
+        menuBar.getMenus().add(modeMenu);
+        return menuBar;
+    }
+
     private void loadData()
-            throws StreamReadException, DatabindException, IOException {
+    throws StreamReadException, DatabindException, IOException {
         subjects = Subject.loadFromFile(datasetFile);
         Config config = Config.load(configFile, subjects.size());
 
@@ -867,14 +954,14 @@ public class MainWindow extends Application {
                 if (selected != null && selected.equals(rq.getLabel())) {
                     continue;
                 } else if (
-                    qcb.getItems().contains(rq.getLabel())
-                    && selectedRelativeQuantifiers.contains(rq)
-                ) {
+                qcb.getItems().contains(rq.getLabel())
+                && selectedRelativeQuantifiers.contains(rq)
+            ) {
                     qcb.getItems().remove(rq.getLabel());
                 } else if (
-                    !qcb.getItems().contains(rq.getLabel())
-                    && !selectedRelativeQuantifiers.contains(rq)
-                ) {
+                !qcb.getItems().contains(rq.getLabel())
+                && !selectedRelativeQuantifiers.contains(rq)
+            ) {
                     qcb.getItems().add(rq.getLabel());
                 }
             }
